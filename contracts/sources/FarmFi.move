@@ -8,6 +8,9 @@ use sui::coin;
 use sui::balance;
 use sui::address;
 
+//package imports
+use contracts::config{Self, Buyer};
+
 //types
 public struct Product has key, store{
     id: u64,
@@ -31,7 +34,7 @@ public fun list_product(
     ): Product {
         Product {
             id: product_id,
-            farmer: signer::address_of(&farmer),
+            farmer: address::address_of(&farmer),
             price,
             available: true
         }
