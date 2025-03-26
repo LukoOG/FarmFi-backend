@@ -33,8 +33,18 @@ app.use(express.json());
 app.use(cookieParser);
 
 connectDB()
+setInterval(() => {
+    if (global.gc) {
+      global.gc();
+      console.log("✅ Garbage collection forced");
+    }
+  }, 60000);
 
 app.use("/auth", require("./routes/authRoutes"))
-
+process.on("SIGINT", async () => {
+  await mongoose.connection.close();
+  console.log("⚠️ MongoDB connection closed due to app termination");
+  process.exit(0);
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0",() => console.log(`Server running on port ${PORT}`));
