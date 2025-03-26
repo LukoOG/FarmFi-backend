@@ -1,7 +1,7 @@
 // index.js (Entry Point)
 const express = require("express")
 const cors = require("cors")
-const cookieParser = reqiure("cookie-parser")
+const cookieParser = require("cookie-parser")
 const connectDB = require("./config/db");
 
 require("dotenv").config();
