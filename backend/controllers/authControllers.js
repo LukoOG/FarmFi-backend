@@ -55,6 +55,14 @@ exports.login = async (req, res) => {
         const payload = { user: { id: user.id, role: user.role } };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "7d" });
 
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,  // Set to true in production (requires HTTPS)
+            sameSite: "Strict",
+            maxAge: 3600000, // 1 hour
+        });
+
+
         res.json({token, suiWalletAddress: user.suiWalletAddress})
 
     }catch(error){
@@ -62,3 +70,5 @@ exports.login = async (req, res) => {
         res.status(500).send("Server error");
     }
 }
+
+//zklogin pathway
