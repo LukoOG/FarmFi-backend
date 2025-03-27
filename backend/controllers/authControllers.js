@@ -3,12 +3,25 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519"); // Sui wallet generation
 
+//imports for zklogin logic
+const { SuiClient, getFullnodeUrl } = require("@mysten/sui/client");
+const {
+    genAddressSeed,
+    generateNonce,
+    generateRandomness,
+    getExtendedEphemeralPublicKey,
+    getZkLoginSignature,
+    jwtToAddress,
+} = require("@mysten/sui/zklogin")
+const { decodePrivateKey } = require("@mysten/sui/cryptography")
+const { jwtDecode } = require("jwt-decode")
+
 exports.register = async(req, res)=> {
     try{
         const { name, email, password, role} = req.body
 
         //check if user doesn't already exists
-        let user = await User.findOne({ email });
+        let user = User.findOne({ email });
         if (user) return res.status(400).json({ msg: "User already exists" });
 
         //hashing the password
@@ -72,3 +85,11 @@ exports.login = async (req, res) => {
 }
 
 //zklogin pathway
+exports.login_oauth = async (req, res) => {
+    try{
+
+    } catch(error){
+        console.log(error);
+        res.status(500).send("oauth failed")
+    }
+}

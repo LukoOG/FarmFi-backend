@@ -4,7 +4,10 @@ module contracts::config;
 //E.G To export coin value
 const COIN_VALUE: u64 = 1000;
 
-public fun coin_value(): u64 { COIN_VALUE };
+public fun coin_value(): u64 { COIN_VALUE }
+
+//CONST TYPES
+
 
 //User roles
 // public struct Buyer has key, store{

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const orderController = require("../controllers/orderControllers")
+
 // Sample order endpoint
 router.post('/place', async (req, res) => {
     const { buyerAddress, farmerAddress, productId, price } = req.body;
@@ -16,5 +18,7 @@ router.post('/place', async (req, res) => {
         res.status(500).json({ error: 'Failed to place order' });
     }
 });
+
+router.post("/order", orderController.create_order)
 
 module.exports = router;

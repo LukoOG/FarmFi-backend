@@ -5,6 +5,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["buyer", "farmer", "logistics_admin"], required: true },
+  location: { type: String, required: false},
   suiWalletAddress: { type: String }, // Store generated wallet address
   kycVerified: { type: Boolean, default: false }, // Future KYC verification
 });

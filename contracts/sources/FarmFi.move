@@ -2,7 +2,9 @@ module contracts::FarmFi;
 
 //imports
 use std::string::String;
+use contracts::Product{Self, Product}
 
+//
 use sui::tx_context;
 use sui::coin;
 use sui::balance;
@@ -11,21 +13,6 @@ use sui::address;
 //package imports
 use contracts::config{Self, Buyer};
 
-//types
-public struct Product has key, store{
-    id: u64,
-    farmer: address,
-    price: u64,
-    available: bool
-}
-
-public struct Order has key, store{
-    id: u64,
-    farmer: address,
-    buyer: address,
-    price: u64,
-    status: u8 //0 = pending, 1 = complete, 2 = canceled
-}
 
 public fun list_product(
         farmer: signer, 
@@ -42,7 +29,7 @@ public fun list_product(
 
 public fun place_order(
         buyer: signer, 
-        farmer: signer::Address, 
+        farmer: address, 
         product_id: u64, 
         price: u64
     ): Order {
