@@ -24,12 +24,10 @@ exports.register = async(req, res)=> {
     try{
         const { name, email, password, role} = req.body
 
-        //check if user doesn't already exists
+        //check if user doesn't already exist
         let user = await User.findOne({ email });
-        if (user){
-            console.log(user)
-         return res.status(400).json({ msg: "User already existing" });
-    }
+        if (user) return res.status(400).json({ msg: "User already exists" });
+    
 
         //hashing the password
         const salt = await bcrypt.genSalt(10);
@@ -96,6 +94,25 @@ exports.login = async (req, res) => {
         console.log(error)
         res.status(500).send("Server error");
     }
+}
+
+exports.getkeypair = async (req, res) => {
+    let { email, password } = req.body;
+    //check if user exists
+    let user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "User does not exist" });
+
+    //check if password is valid
+    const isMatch = bcrypt.compare(password, user.password)
+    if (!isMatch) return res.status(400).json({ msg:"Invalid password" })
+
+    //decrypt mnemonic and generte keypair
+    const decryptedMnemonic = decryptMnemonic(user.mnemonic, password)
+    const seed = bip39.mnemonicToSeedSync(decryptedMnemonic);
+    const path = "m/44'/784'/0'/0'/0'"; // Standard for Sui wallets
+    const derivedKey = derivePath(path, seed.toString("hex")).key;
+    const keypair = Ed25519Keypair.fromSecretKey(derivedKey);
+    return res.json({keypair})
 }
 
 //zklogin pathway
