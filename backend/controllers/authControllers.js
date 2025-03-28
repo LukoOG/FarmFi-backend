@@ -2,6 +2,7 @@ const User = require("../models/Users");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const bip39 = require("bip39")
+const { derivePath } = require("ed25519-hd-key")
 
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519"); // Sui wallet generation
 
@@ -16,15 +17,19 @@ const {
     jwtToAddress,
 } = require("@mysten/sui/zklogin")
 const { decodePrivateKey } = require("@mysten/sui/cryptography")
-const { jwtDecode } = require("jwt-decode")
+const { jwtDecode } = require("jwt-decode");
+const { encryptMnemonic,  decryptMnemonic } = require("../utils/mnemonic");
 
 exports.register = async(req, res)=> {
     try{
         const { name, email, password, role} = req.body
 
         //check if user doesn't already exists
-        let user = User.findOne({ email });
-        if (user) return res.status(400).json({ msg: "User already exists" });
+        let user = await User.findOne({ email });
+        if (user){
+            console.log(user)
+         return res.status(400).json({ msg: "User already existing" });
+    }
 
         //hashing the password
         const salt = await bcrypt.genSalt(10);
@@ -45,13 +50,13 @@ exports.register = async(req, res)=> {
             email,
             password: hashedPassword,
             role,
-            mnemonic,
+            mnemonic: encryptMnemonic(mnemonic, password), //store the encrypted mnemonic
             suiWalletAddress
         })
         await user.save()
 
         //generate jwt-token
-        const payload = { user:  User.findById(user._id) };
+        const payload = { user: user };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "7d" });
     
         res.json({ token, mnemonic, suiWalletAddress });
