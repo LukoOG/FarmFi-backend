@@ -42,7 +42,6 @@ public fun create_order(
     product: Product,
     buyer_payment: Coin<SUI>,
     ctx: &mut TxContext
-
 ){
     //check cases
     assert!(buyer_payment.value() == product.price, config::error_PriceMismatch());
@@ -62,16 +61,17 @@ public fun create_order(
 }
 
 //completes an order and releases escrow to the farmer
-// public entry fun complete_order(order: &mut Order, farmer: &signer){
-//     assert!(order.status == Status::Pending, ORDERNOTCOMPLETED);
-//     assert!(order.farmer == signer::address_of(farmer), NOTFARMERORDER);
+public fun complete_order(order: &mut Order, ctx: &mut TxContext){
+    assert!(order.status == Status::Pending, config::error_OrderNotPending());
+    // assert!(order.farmer == signer::address_of(farmer), config::error_NotFarmerOrder());
 
-//     let escrow_funds = order.escrow.extract();
-//     let recipient: address = signer::address_of(farmer);
-//     transfer::public_transfer(escrow_funds, recipient);
+    let v_u = order.escrow.value();
+    let escrow_funds = order.escrow.split<SUI>(v_u, ctx);
+    let recipient: address = order.farmer;
+    transfer::public_transfer(escrow_funds, recipient);
 
-//     order.status = Status::Completed;
-// }
+    order.status = Status::Completed;
+}
 
 // ///Cancels an order and returns escrow to the buyer
 // public entry fun cancel_order(order: &mut Order, buyer: &signer){
