@@ -17,7 +17,7 @@ const OrderSchema = new mongoose.Schema({
     }],
     totalPrice: { type: Number, required: true },
     status: {type: String, enum:status, required: true, default: "Pending"},
-    escrowTxHash: { type: String } //Escro transaction hash on-chain
+    escrowTxHash: { type: String } //Order transaction hash on-chain
 }, { timestamps: true })
 
 module.exports = mongoose.model("Order", OrderSchema)

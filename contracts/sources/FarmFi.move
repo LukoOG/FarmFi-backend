@@ -1,5 +1,5 @@
 #[allow(unused_field, lint(coin_field))]
-module contracts::Order;
+module contracts::FarmFi;
 
 use sui::sui::SUI;
 use sui::coin::{Coin};

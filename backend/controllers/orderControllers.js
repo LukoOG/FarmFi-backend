@@ -13,19 +13,18 @@ exports.get_order = async (req, res) => {
 }
 
 exports.create_order = async (req, res) => {
-    const { farmer, buyer, product, totalPrice } = req.body //expected information
+    const { product, payment } = req.body //expected information
     //cases to abort operation
     if(!User.findById(farmer) || !User.findById(buyer)) res.status(400).json({error: "invalid users"})
-
+    
     //creating onchain transaction and retrieving escrow hash
-    // const escrow = Contracts.;
-    //creatng order
+    const hash = Contracts.CreateTransction(product, payment)
     let order = new Order({
         farmer,
         buyer,
         product,
         totalPrice,
-        escrow: escrow
+        escrowTxHash: hash,
 
     })
     res.status(200).json({msg:"Order successfuly created"})

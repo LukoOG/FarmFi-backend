@@ -1,5 +1,7 @@
 //Code snippet for interactng with the blockchan from GPT
 const express = require("express");
+
+require("dotenv").config()
 const { Ed25519Keypair, JsonRpcProvider, RawSigner } = require("@mysten/sui");
 
 
@@ -7,25 +9,24 @@ const SUI_RPC = "https://fullnode.devnet.sui.io"; // Change for mainnet
 const provider = new JsonRpcProvider(SUI_RPC);
 
 // Wallet private key for signing transactions (DO NOT expose in frontend)
-const keypair = Ed25519Keypair.fromSecretKey(Uint8Array.from(Buffer.from(, "hex")));
+// const keypair = Ed25519Keypair.fromSecretKey(Uint8Array.from(Buffer.from(, "hex")));
 const signer = new RawSigner(keypair, provider);
-
-// Deployed Move contract details
-const PACKAGE_ID = "0xYourPackageId";
-const MODULE_NAME = "order";
-const TREASURY_CAP = "0xYourTreasuryCapObjectId"; // Required for minting escrow funds
-
-// Simulated MongoDB Order model (Replace with actual DB schema)
-const orders = {}; // Replace with MongoDB collection
 
 /** 🔹 CREATE ORDER (Buyer places order & funds go to escrow) */
 
-exports.CreateTransction = async (farmer, buyer, price) => {
+exports.CreateTransction = async (product, payment) => {
+    //frontend passes payment as SUI coin
+    let product = {
+        offchain_id: product._id.toString(),
+        price: Number(product.price),
+        farmer: product.farmer.suiWalletAddress, //farmer address stored in mongodb
+    }
+
     const tx = {
-        packageObjectId: PACKAGE_ID,
-        module: MODULE_NAME,
+        packageObjectId: process.env.PACKAGE_ID,
+        module: process.env.MODULE_NAME,
         function: "create_order",
-        arguments: [farmer, price, TREASURY_CAP],
+        arguments: [product, payment],
         typeArguments: [],
         gasBudget: 10000,
     }
