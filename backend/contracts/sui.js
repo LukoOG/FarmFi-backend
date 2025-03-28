@@ -2,21 +2,17 @@
 const express = require("express");
 
 require("dotenv").config()
-const { Ed25519Keypair, JsonRpcProvider, RawSigner } = require("@mysten/sui");
+const app = express()
+// const { Ed25519Keypair, JsonRpcProvider, RawSigner } = require("@mysten/sui");
 
 
-const SUI_RPC = "https://fullnode.devnet.sui.io"; // Change for mainnet
-const provider = new JsonRpcProvider(SUI_RPC);
+// const SUI_RPC = "https://fullnode.devnet.sui.io";
+// const provider = new JsonRpcProvider(SUI_RPC);
 
-// Wallet private key for signing transactions (DO NOT expose in frontend)
-// const keypair = Ed25519Keypair.fromSecretKey(Uint8Array.from(Buffer.from(, "hex")));
-const signer = new RawSigner(keypair, provider);
-
-/** 🔹 CREATE ORDER (Buyer places order & funds go to escrow) */
 
 exports.CreateTransction = async (product, payment) => {
     //frontend passes payment as SUI coin
-    let product = {
+    let _product = {
         offchain_id: product._id.toString(),
         price: Number(product.price),
         farmer: product.farmer.suiWalletAddress, //farmer address stored in mongodb
@@ -26,12 +22,25 @@ exports.CreateTransction = async (product, payment) => {
         packageObjectId: process.env.PACKAGE_ID,
         module: process.env.MODULE_NAME,
         function: "create_order",
-        arguments: [product, payment],
+        arguments: [_product, payment],
         typeArguments: [],
         gasBudget: 10000,
     }
+
     const response = await signer.executeMoveCall(tx);
-    console.log("Order Created:", response);
+
+    console.log("transaction",response)
+
+    const orderEvent = response?.events?.find(
+        (event) => event.moveEvent?.type === `${process.env.PACKAGE_ID}::${process.env.MODULE_NAME}::OrderCreated`
+    );
+    if (orderEvent) {
+        const orderId = orderEvent.moveEvent.fields.order_id;
+        console.log("New Order ID:", orderId);
+    }else{
+        console.log("no new event found")
+    }
+    return orderId
 }
 
 

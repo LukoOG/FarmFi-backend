@@ -56,8 +56,9 @@ public fun create_order(
         escrow: buyer_payment,
         };
     //emitted event for off-chain sync
-    event::emit(OrderCreated { order_id: object::uid_to_address(&order.id) });  
-    transfer::share_object(order); // Make order publicly accessible  
+    let order_address = object::uid_to_address(&order.id);
+    event::emit(OrderCreated { order_id: order_address});  
+    transfer::share_object(order); // Make order publicly accessible
 }
 
 //completes an order and releases escrow to the farmer
