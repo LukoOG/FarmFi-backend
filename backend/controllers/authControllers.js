@@ -52,12 +52,16 @@ exports.register = async(req, res)=> {
             suiWalletAddress
         })
         await user.save()
+        //exclude password and mnemonic
+        let userObj = user.toObject()
+        delete userObj.mnemonic;
+        delete userObj.password;
 
         //generate jwt-token
-        const payload = { user: user };
+        const payload = { user: userObj };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "7d" });
     
-        res.json({ token, mnemonic, suiWalletAddress });
+        res.json({ token, mnemonic });
     } catch(error){
         console.log(error)
         res.status(500).send("Server error");
@@ -69,15 +73,18 @@ exports.login = async (req, res) => {
         const { email, password } = req.body
         
         //get the user
-        let user = await User.findOne({email})
+        let user = await User.findOne({email}).select("-mnemonic")
         if (!user) return res.status(400).json({ msg: "User does not exist" });
 
         //check password
         const isMatch = bcrypt.compare(password, user.password)
         if (!isMatch) return res.status(400).json({ msg:"Invalid credentials" })
 
+        let userObj = user.toObject()
+        delete userObj.password;
+
         //generate token
-        const payload = { user: user };
+        const payload = { user: userObj };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "7d" });
 
         res.cookie("token", token, {
@@ -88,7 +95,7 @@ exports.login = async (req, res) => {
         });
 
 
-        res.json({token, suiWalletAddress: user.suiWalletAddress})
+        res.json({token})
 
     }catch(error){
         console.log(error)
