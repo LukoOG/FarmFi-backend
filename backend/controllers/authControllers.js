@@ -1,6 +1,8 @@
 const User = require("../models/Users");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const bip39 = require("bip39")
+
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519"); // Sui wallet generation
 
 //imports for zklogin logic
@@ -28,8 +30,14 @@ exports.register = async(req, res)=> {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        //creating the recovery phrase
+        const mnemonic = bip39.generateMnemonic();
+        const seed = bip39.mnemonicToSeedSync(mnemonic);
+        const path = "m/44'/784'/0'/0'/0'"; // Standard for Sui wallets
+        const derivedKey = derivePath(path, seed.toString("hex")).key;
+    
         //generating their wallet
-        const keypair = new Ed25519Keypair();
+        const keypair = Ed25519Keypair.fromSecretKey(derivedKey);
         const suiWalletAddress = keypair.toSuiAddress();
 
         user = new User({
@@ -37,15 +45,16 @@ exports.register = async(req, res)=> {
             email,
             password: hashedPassword,
             role,
+            mnemonic,
             suiWalletAddress
         })
         await user.save()
 
         //generate jwt-token
-        const payload = { user: { id: user.id, role: user.role } };
+        const payload = { user:  User.findById(user._id) };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "7d" });
     
-        res.json({ token, suiWalletAddress });
+        res.json({ token, mnemonic, suiWalletAddress });
     } catch(error){
         console.log(error)
         res.status(500).send("Server error");
@@ -65,7 +74,7 @@ exports.login = async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg:"Invalid credentials" })
 
         //generate token
-        const payload = { user: { id: user.id, role: user.role } };
+        const payload = { user: user };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "7d" });
 
         res.cookie("token", token, {
