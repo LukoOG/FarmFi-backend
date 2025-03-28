@@ -1,8 +1,10 @@
 const Order = require("../models/Orders");
+const User = require("../models/Users");
+const Contracts = require("../contracts/sui")
 
 exports.get_order = async (req, res) => {
     //adjust according to frontend needs
-    const { id, farmer } = req.body
+    const { farmer } = req.body
     const order = await Order.find({farmer}).find
 
     if(!order){
@@ -11,12 +13,20 @@ exports.get_order = async (req, res) => {
 }
 
 exports.create_order = async (req, res) => {
-    const {} = req.body //expected information
+    const { farmer, buyer, product, totalPrice } = req.body //expected information
     //cases to abort operation
+    if(!User.findById(farmer) || !User.findById(buyer)) res.status(400).json({error: "invalid users"})
 
+    //creating onchain transaction and retrieving escrow hash
+    const escrow = Contracts.;
     //creatng order
     let order = new Order({
-        //pass in necessary fields
+        farmer,
+        buyer,
+        product,
+        totalPrice,
+        escrow: escrow
+
     })
     res.status(200).json({msg:"Order successfuly created"})
 }

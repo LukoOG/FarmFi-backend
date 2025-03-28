@@ -1,13 +1,13 @@
 //Code snippet for interactng with the blockchan from GPT
 const express = require("express");
-const { Ed25519Keypair, JsonRpcProvider, RawSigner } = require("@mysten/sui.js");
+const { Ed25519Keypair, JsonRpcProvider, RawSigner } = require("@mysten/sui");
 
 
 const SUI_RPC = "https://fullnode.devnet.sui.io"; // Change for mainnet
 const provider = new JsonRpcProvider(SUI_RPC);
 
 // Wallet private key for signing transactions (DO NOT expose in frontend)
-const keypair = Ed25519Keypair.fromSecretKey(Uint8Array.from(Buffer.from(process.env.PRIVATE_KEY, "hex")));
+const keypair = Ed25519Keypair.fromSecretKey(Uint8Array.from(Buffer.from(, "hex")));
 const signer = new RawSigner(keypair, provider);
 
 // Deployed Move contract details
@@ -19,31 +19,22 @@ const TREASURY_CAP = "0xYourTreasuryCapObjectId"; // Required for minting escrow
 const orders = {}; // Replace with MongoDB collection
 
 /** 🔹 CREATE ORDER (Buyer places order & funds go to escrow) */
-app.post("/orders", async (req, res) => {
-    try {
-        const { farmer, buyer, price } = req.body;
 
-        const tx = {
-            packageObjectId: PACKAGE_ID,
-            module: MODULE_NAME,
-            function: "create_order",
-            arguments: [farmer, price, TREASURY_CAP],
-            typeArguments: [],
-            gasBudget: 10000,
-        };
-
-        const response = await signer.executeMoveCall(tx);
-        console.log("Order Created:", response);
-
-        // Save order to DB (for off-chain tracking)
-        const order = { id: response.effects.created[0].reference.objectId, farmer, buyer, price, status: "Pending" };
-        orders[order.id] = order;
-
-        res.json({ message: "Order created", order });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+exports.CreateTransction = async (farmer, buyer, price) => {
+    const tx = {
+        packageObjectId: PACKAGE_ID,
+        module: MODULE_NAME,
+        function: "create_order",
+        arguments: [farmer, price, TREASURY_CAP],
+        typeArguments: [],
+        gasBudget: 10000,
     }
-});
+    const response = await signer.executeMoveCall(tx);
+    console.log("Order Created:", response);
+}
+
+
+
 
 /** 🔹 COMPLETE ORDER (Release escrow funds to farmer) */
 app.post("/orders/:id/complete", async (req, res) => {

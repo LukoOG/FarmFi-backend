@@ -8,16 +8,16 @@ const status = [
 ]
 
 const OrderSchema = new mongoose.Schema({
-    farmer: { type: String, required: true },
-    buyer: { type: String, required: true},
-    product: {
+    farmer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    buyer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    product: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: Product,
+        ref: "Product",
         required: true,
-    },
-    price: { type: Number, required: true, default:0},
-    status: {type: String, enum:status, required: true},
-    escrowID: { type: String }
+    }],
+    totalPrice: { type: Number, required: true },
+    status: {type: String, enum:status, required: true, default: "Pending"},
+    escrowTxHash: { type: String } //Escro transaction hash on-chain
 }, { timestamps: true })
 
 module.exports = mongoose.model("Order", OrderSchema)

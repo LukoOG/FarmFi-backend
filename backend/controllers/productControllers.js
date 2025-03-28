@@ -38,7 +38,7 @@ exports.get_All = async (req, res) => {
 
 exports.get_id = async ( req, res ) => {
     try{
-        const product = await Product.findById(req.params.id)
+        const product = await Product.findById(req.params.id).populate("farmer")
         if (!product) res.status(400).json({error:"Product not found"})
         res.status(200).json({product})
     } catch(error){

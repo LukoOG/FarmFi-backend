@@ -1,71 +1,86 @@
+#[allow(unused_field, lint(coin_field))]
 module contracts::Order;
 
 use sui::sui::SUI;
-use sui::coin::{Coin, TreasuryCap};
+use sui::coin::{Coin};
+// use sui::balance::{Self, Balance};
+
+use sui::event;
+
+use std::string::String;
 
 use contracts::config;
+// use contracts::Product::Product;
 
-//constants
-const ORDERNOTCOMPLETED: u8 = 0;
-const ORDERNOTPENDING: u8 = 3;
-const NOTFARMERORDER: u8 = 1;
-const NOTBUYERORDER: u8 = 2;
-
-public enum Status has key, store{
+public enum Status has store, drop, copy{
     Pending,
     Completed,
     Cancelled,
     //add more types based on Lydia's Overthinking nature
 }
 
-public struct Order has key, store{
+
+public struct OrderCreated has copy, drop{order_id: address}
+
+public struct Product has store, drop{
+    offchain_id: String,
+    price: u64,
+    farmer: address
+}
+
+public struct Order has key{
     id: UID,
     farmer: address,
     buyer: address,
     product: Product,
-    price: u64,
     status: Status,
-    escrow: Option<Coin<SUI>>
+    escrow: Coin<SUI>
 }
 
 ///creates the order on the blockchain
-public entry fun create_order<T>(
-    buyer: &signer,
-    farmer: address,
-    price: u64,
-    treasure: &mut TreasuryCap<T>,
+public fun create_order(
+    product: Product,
+    buyer_payment: Coin<SUI>,
     ctx: &mut TxContext
 
-): Order{
-    let escrow = Coin::split(Coin::mnt(treasure, price, ctx), price); //lock the funds
-    Order{
-        id: Object::new(ctx),
-        farmer,
-        buyer: signer::address_of(buyer),
-        price,
+){
+    //check cases
+    assert!(buyer_payment.value() == product.price, config::error_PriceMismatch());
+    assert!(product.farmer != ctx.sender(), config::error_InvalidSelfTrade());
+
+    let order = Order{
+        id: object::new(ctx),
+        farmer: product.farmer,
+        buyer:  ctx.sender(),
+        product,
         status: Status::Pending,
-        escrow: Some(escrow),
-        }
+        escrow: buyer_payment,
+        };
+    //emitted event for off-chain sync
+    event::emit(OrderCreated { order_id: object::uid_to_address(&order.id) });  
+    transfer::share_object(order); // Make order publicly accessible  
 }
 
-///completes an order and releases escrow to the farmer
-public entry fun complete_order(order: &mut Order, farmer: &signer){
-    assert!(order::state == Status::Pending, ORDERNOTCOMPLETED);
-    assert!(order.farmer == signer::address_of(farmer), NOTFARMERORDER);
+//completes an order and releases escrow to the farmer
+// public entry fun complete_order(order: &mut Order, farmer: &signer){
+//     assert!(order.status == Status::Pending, ORDERNOTCOMPLETED);
+//     assert!(order.farmer == signer::address_of(farmer), NOTFARMERORDER);
 
-    let escrow_funds = option::take(&mut order.escrow);
-    Coin::join(escrow_funds, farmer);
+//     let escrow_funds = order.escrow.extract();
+//     let recipient: address = signer::address_of(farmer);
+//     transfer::public_transfer(escrow_funds, recipient);
 
-    order.status = Status::Completed;
-};
+//     order.status = Status::Completed;
+// }
 
-///Cancels an order and returns escrow to the buyer
-public entry fun cancel_order(order: &mut Order, buyer: &signer){
-    assert!(order::status == Status::Pending, ORDERNOTPENDING);
-    assert!(order.buyer == signer::address_of(buyer), NOTBUYERORDER);
+// ///Cancels an order and returns escrow to the buyer
+// public entry fun cancel_order(order: &mut Order, buyer: &signer){
+//     assert!(order.status == Status::Pending, ORDERNOTPENDING);
+//     assert!(order.buyer == signer::address_of(buyer), NOTBUYERORDER);
 
-    let escrow_funds = option::take(&mut order.escrow);
-    Coin::join(escrow_funds, buyer);
+//     let escrow_funds = order.escrow.extract();
+//     let recipient = signer::address_of(buyer);
+//     transfer::public_transfer(escrow_funds, recipient);
 
-    order.status = Status.Cancelled;
-}
+//     order.status = Status::Cancelled;
+// }
