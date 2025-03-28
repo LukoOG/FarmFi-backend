@@ -18,7 +18,7 @@ exports.create_order = async (req, res) => {
     if(!User.findById(farmer) || !User.findById(buyer)) res.status(400).json({error: "invalid users"})
 
     //creating onchain transaction and retrieving escrow hash
-    const escrow = Contracts.;/
+    // const escrow = Contracts.;
     //creatng order
     let order = new Order({
         farmer,
