@@ -1,16 +1,11 @@
-//Code snippet for interactng with the blockchan from GPT
-const express = require("express");
+const { Transaction } = require("@mysten/sui/transactions")
+const { getFullnodeUrl, SuiClient } = require("@mysten/sui/client")
 
-require("dotenv").config()
-const app = express()
-// const { Ed25519Keypair, JsonRpcProvider, RawSigner } = require("@mysten/sui");
+require("dotenv").config();
 
+const client = new SuiClient({ url: getFullnodeUrl('devnet') });
 
-// const SUI_RPC = "https://fullnode.devnet.sui.io";
-// const provider = new JsonRpcProvider(SUI_RPC);
-
-
-exports.CreateTransction = async (product, payment) => {
+exports.CreateTransction = async (product, payment, keypair) => {
     //frontend passes payment as SUI coin
     let _product = {
         offchain_id: product._id.toString(),
@@ -18,31 +13,31 @@ exports.CreateTransction = async (product, payment) => {
         farmer: product.farmer.suiWalletAddress, //farmer address stored in mongodb
     }
 
-    const tx = {
-        packageObjectId: process.env.PACKAGE_ID,
-        module: process.env.MODULE_NAME,
-        function: "create_order",
-        arguments: [_product, payment],
+    const tx = new Transaction();
+    const target_smc = `${process.env.PACKAGE_ID}::${process.env.MODULE_NAME}::create_order`
+    
+    tx.moveCall({
+        // package: process.env.PACKAGE_ID,
+        // module: process.env.MODULE_NAME,
+        // function: "create_order",
+        target: target_smc,
+        arguments: [tx.object(_product), tx.pure(payment)],
         typeArguments: [],
-        gasBudget: 10000,
+    })
+    tx.setGasBudget(10000000)
+    const response = await keypair.signAndExecuteTransactionBlock(tx);
+
+    const orderEvent = response?.events?.find(
+        (event) => event.moveEvent?.type === `${process.env.PACKAGE_ID}::${process.env.MODULE_NAME}::OrderCreated`
+    );
+    if (orderEvent) {
+        const orderId = orderEvent.moveEvent.fields.order_id;
+        console.log("New Order ID:", orderId);
+    }else{
+        console.log("no new event found")
     }
-    return tx
+    return orderId
 }
-//     const response = await signer.executeMoveCall(tx);
-
-//     console.log("transaction",response)
-
-//     const orderEvent = response?.events?.find(
-//         (event) => event.moveEvent?.type === `${process.env.PACKAGE_ID}::${process.env.MODULE_NAME}::OrderCreated`
-//     );
-//     if (orderEvent) {
-//         const orderId = orderEvent.moveEvent.fields.order_id;
-//         console.log("New Order ID:", orderId);
-//     }else{
-//         console.log("no new event found")
-//     }
-//     return orderId
-// }
 
 
 

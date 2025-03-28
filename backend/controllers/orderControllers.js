@@ -18,14 +18,14 @@ exports.create_order = async (req, res) => {
     if(!User.findById(product.farmer) || !User.findById(buyer)) res.status(400).json({error: "invalid users"})
     
     //creating onchain transaction and retrieving escrow hash
-    const tx = await Contracts.CreateTransction(product, payment)
+    const tx = await Contracts.CreateTransction(product, payment, keypair)
     let order = new Order({
         farmer,
         buyer,
         product,
         totalPrice,
     })
-    res.status(200).json({transaction:tx})
+    res.status(200).json({transaction:tx}) //sending to frontend to sign
 }
 
 exports.cancel_order = async (req, res) => {

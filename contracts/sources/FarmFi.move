@@ -39,13 +39,22 @@ public struct Order has key{
 
 ///creates the order on the blockchain
 public fun create_order(
-    product: Product,
+    // product: Product, gats pass in the individual fields
+    offchain_id: String,
+    price: u64,
+    farmer: address,
     buyer_payment: Coin<SUI>,
     ctx: &mut TxContext
 ){
     //check cases
-    assert!(buyer_payment.value() == product.price, config::error_PriceMismatch());
-    assert!(product.farmer != ctx.sender(), config::error_InvalidSelfTrade());
+    assert!(buyer_payment.value() == price, config::error_PriceMismatch());
+    assert!(farmer != ctx.sender(), config::error_InvalidSelfTrade());
+
+    let product = Product{
+        offchain_id,
+        price,
+        farmer,
+    };
 
     let order = Order{
         id: object::new(ctx),
