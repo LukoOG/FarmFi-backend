@@ -26,3 +26,15 @@ exports.decryptMnemonic = (encryptedMnemonic, password) => {
 
     return decrypted;
 }
+
+exports.getKeypair = async (mnemonic, password) => {
+        const isMatch = bcrypt.compare(password, user.password)
+        if (!isMatch) return res.status(400).json({ msg:"Invalid password" })
+    
+        //decrypt mnemonic and generte keypair
+        const decryptedMnemonic = decryptMnemonic(mnemonic, password)
+        const seed = bip39.mnemonicToSeedSync(decryptedMnemonic);
+        const path = "m/44'/784'/0'/0'/0'"; // Standard for Sui wallets
+        const derivedKey = derivePath(path, seed.toString("hex")).key;
+        const keypair = Ed25519Keypair.fromSecretKey(derivedKey);
+}

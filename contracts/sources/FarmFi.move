@@ -45,7 +45,7 @@ public fun create_order(
     farmer: address,
     buyer_payment: Coin<SUI>,
     ctx: &mut TxContext
-){
+): ID{
     //check cases
     assert!(buyer_payment.value() == price, config::error_PriceMismatch());
     assert!(farmer != ctx.sender(), config::error_InvalidSelfTrade());
@@ -68,6 +68,7 @@ public fun create_order(
     let order_address = object::uid_to_address(&order.id);
     event::emit(OrderCreated { order_id: order_address});  
     transfer::share_object(order); // Make order publicly accessible
+    order_address
 }
 
 //completes an order and releases escrow to the farmer
