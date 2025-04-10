@@ -5,3 +5,5 @@ export const router = Router()
 // router.post()
 // router.post()
 // router.post()
+
+export default router
