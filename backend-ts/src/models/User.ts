@@ -6,7 +6,7 @@ const status = [
     "Cancelled",
 ] as const;
 
-interface IUser extends Document{
+export interface IUser extends Document{
     name: string;
     email: string;
     password: string;
@@ -17,6 +17,7 @@ interface IUser extends Document{
     zkLoginAddress?: string;
     kycVerified: boolean;
 }
+export type SafeUser = Omit<IUser, "password" | "mnemonic">;
 
 const UserSchema = new Schema<IUser>({
     name: { type: String, required: true },
@@ -30,5 +31,13 @@ const UserSchema = new Schema<IUser>({
     kycVerified: { type: Boolean, default: false }, // Future KYC verification
 })
 
-const User = mongoose.model<IUser>("User", UserSchema)
-export default User
+UserSchema.set("toJSON", {
+    transform: function (doc, ret, options){
+        delete ret.password
+        delete ret.mnemonic
+        return ret
+    }
+})
+
+export const User = mongoose.model<IUser>("User", UserSchema)
+
