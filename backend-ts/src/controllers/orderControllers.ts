@@ -39,7 +39,7 @@ export const createOrder = async (req: Request, res: Response) => {
     const keypair = await getKeypair(user?.mnemonic!, user?.password!)
     //constructing transaction block
     const payment = await extractPayment(product.price, keypair) //payment coin
-    const tx = payment && await createOrderTx(product, payment, keypair) //transaction object to be signed
+    const tx = payment && await createOrderTx(product, payment) //transaction object to be signed
 
     if (tx){
          res.status(200).json({Transaction:tx})

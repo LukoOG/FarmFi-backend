@@ -1,7 +1,7 @@
 import { IProduct } from "../models/Product";
 
 import { Transaction } from "@mysten/sui/transactions";
-import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519"
 import { getOwnedCoins } from "./sui-utils";
 
 import { sui_conversion, client } from "./sui-constants";
@@ -11,6 +11,7 @@ interface IProductWithFarmerAddress extends IProduct {
   }
 
 //todo, create a function that goes through the wallet with 2 coins of value 10 and gets a coin of value 13
+//won't work for just 1 coin
 export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     const price: number = prc * sui_conversion
     const wallet = keypair.getPublicKey().toSuiAddress()
