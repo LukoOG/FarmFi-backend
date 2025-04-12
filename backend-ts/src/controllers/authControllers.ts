@@ -5,7 +5,7 @@ import * as bcrypt from "bcrypt"
 import * as bip39 from "bip39"
 import * as jwt from "jsonwebtoken"
 
-import { Ed25519Keypair } from "@mysten/sui/dist/cjs/keypairs/ed25519";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { derivePath } from "ed25519-hd-key";
 
 import { User, IUser, SafeUser } from "../models/User";
