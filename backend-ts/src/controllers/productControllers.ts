@@ -1,4 +1,4 @@
-import Product from "../models/Product";
+import { Product, IProduct } from "../models/Product";
 import { Request, Response } from "express";
 
 //api endpoints

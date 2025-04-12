@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
         const { name, email, password, role }= req.body
 
         let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ msg: "User already exists" });
+        if (user)  res.status(400).json({ msg: "User already exists" });
 
         //hashing the password
         const salt: string = await bcrypt.genSalt(10);
@@ -51,7 +51,7 @@ export const register = async (req: Request, res: Response) => {
         res.json({ token, mnemonic });
         
     } catch(err){
-        return res.status(400).json({error:err})
+         res.status(400).json({error:err})
     }
 }
 
@@ -60,14 +60,14 @@ export const login = async (req: Request, res: Response) => {
         const { email, password } = req.body
         
         //get the user
-        let user = await User.findOne({email}).select("-mnemonic")
-        if (!user) return res.status(400).json({ msg: "User does not exist" });
+        const user = await User.findOne({email}) as IUser
+        if (!user)  res.status(400).json({ msg: "User does not exist" });
 
         //check password
         const isMatch = bcrypt.compare(password, user.password)
-        if (!isMatch) return res.status(400).json({ msg:"Invalid credentials" })
+        if (!isMatch)  res.status(400).json({ msg:"Invalid credentials" })
 
-        let userObj: SafeUser = user.toJSON()
+        let userObj = user.toJSON() as SafeUser
         
         //generate token
         const payload = { user: userObj };
@@ -76,12 +76,12 @@ export const login = async (req: Request, res: Response) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: true,  // Set to true in production (requires HTTPS)
-            sameSite: "None",
+            sameSite: "none",
             maxAge: 3600000, // 1 hour
         });
 
 
-        res.json({token})
+        res.status(200).json({token})
 
     }catch(error){
         console.log(error)

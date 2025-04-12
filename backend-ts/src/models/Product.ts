@@ -6,7 +6,8 @@ const categories =[
     "Others",
 ] as const;
 
-interface IProduct extends Document{
+export interface IProduct extends Document{
+    _id: mongoose.Types.ObjectId;
     name: string;
     farmer: mongoose.Types.ObjectId;
     price: number;
@@ -30,5 +31,4 @@ const ProductSchema = new Schema<IProduct>({
     available: { type: Boolean, required:true, default:true},
 })
 
-const Product = mongoose.model<IProduct>("Product", ProductSchema)
-export default Product
+export const Product = mongoose.model<IProduct>("Product", ProductSchema)

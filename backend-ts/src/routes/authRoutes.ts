@@ -1,7 +1,9 @@
 import { Router } from "express";
+import { login, register } from "../controllers/authControllers";
 
 export const router = Router()
 
-// router.post()
-// router.post()
-// router.post()
+router.post("/login", login)
+router.post("/register", register)
+
+export default router

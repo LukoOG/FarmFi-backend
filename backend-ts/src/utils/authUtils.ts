@@ -32,9 +32,6 @@ export const decryptMnemonic = (encryptedMnemonic: string, password: string) => 
 }
 
 export const getKeypair = async (mnemonic: string, password: string) => {
-    // const isMatch = bcrypt.compare(password, user.password)
-    // if (!isMatch) return res.status(400).json({ msg:"Invalid password" })
-
     //decrypt mnemonic and generte keypair
     const decryptedMnemonic = decryptMnemonic(mnemonic, password)
     const seed = bip39.mnemonicToSeedSync(decryptedMnemonic);

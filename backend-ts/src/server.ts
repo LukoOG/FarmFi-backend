@@ -6,9 +6,9 @@ import { connectDB } from "./config/db";
 import "dotenv/config"
 
 import productRoutes from "./routes/productRoutes"
+import orderRoutes from "./routes/orderRoutes"
+import authRoutes from "./routes/authRoutes"
 
-// const cookieParser = require("cookie-parser")
-// const cors = require("cors")
 const app = express();
 
 const allowedOrigins = [
@@ -18,7 +18,7 @@ const allowedOrigins = [
   
   app.use(
     cors({
-        origin: function (origin: string, callback: Function) {
+        origin: function (origin, callback: Function) {
             // bypass the requests with no origin (like curl requests, mobile apps, etc )
             if (!origin) return callback(null, true);
         
@@ -46,9 +46,9 @@ setInterval(() => {
   }, 60000);
 
 //app routes
-// app.use("/auth", require("./routes/authRoutes"))
+app.use("/auth", authRoutes)
 app.use("/product", productRoutes)
-// app.use("/order", require("./routes/orderRoutes"))
+app.use("/order", orderRoutes)
 
 process.on("SIGINT", async () => {
   await mongoose.connection.close();
