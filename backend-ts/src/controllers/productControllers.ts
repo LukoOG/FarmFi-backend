@@ -37,16 +37,20 @@ export const getByID = async (req:Request, res:Response) => {
 }
 export const updateProduct = async (req:Request, res:Response) => {
     try{
-        const product = Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        console.log(req.body)
+        if (!product) {res.status(400).json({error:"no product found"}); return}
+        res.status(200).json({msg:"product updated", product:product})
     } catch(error){
         res.status(500).json({ error: error})
     }
 }
 
-export const deleteProduct = async (req:Request) => {
+export const deleteProduct = async (req:Request, res:Response) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
-        if (!product) return 
+        if (!product) {res.status(400).json({error:"no product found"}); return}
+        res.status(200).json({msg:"product deleted"})
     } catch (err: unknown) {
         console.log( err );
     }

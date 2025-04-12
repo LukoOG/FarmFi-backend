@@ -1,9 +1,9 @@
 import mongoose, {Document, Schema} from "mongoose";
 
 const categories =[
-    "Staple",
-    "Cash",
-    "Others",
+    "staple",
+    "cash",
+    "others",
 ] as const;
 
 export interface IProduct extends Document{

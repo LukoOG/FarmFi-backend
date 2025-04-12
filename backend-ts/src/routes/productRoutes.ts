@@ -6,7 +6,7 @@ const router = Router()
 router.post("/create", upload.single("image"), createProduct)
 router.get("/all", getAll)
 router.get("/:id", getByID)
-router.put("/update", updateProduct)
-router.delete("/delete", deleteProduct)
+router.put("/update/:id", updateProduct)
+router.delete("/delete/:id", deleteProduct)
 
 export default router
