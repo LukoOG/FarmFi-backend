@@ -24,27 +24,34 @@ export const getOrder = async (req: Request, res: Response) => {
 export const createOrder = async (req: Request, res: Response) => {
     const { buyer, product, password } = req.body //expected information
     //cases to abort operation
-    const user = await User.findOne({ email:buyer });
+    const user = await User.findOne({ email:buyer }) as IUser;
     const farmerExists: boolean = product?.farmer && await User.findById(product.farmer)
 
     if(!farmerExists || !user){
-         res.status(400).json({error: "invalid users"})
+        res.status(400).json({error: "invalid users"})
+        return;
     }
 
     //construct the keypair
-    const isMatch = bcrypt.compare(password, user?.password!)
-    if (!isMatch)  res.status(400).json({ msg:"Invalid password" })
+    const isMatch = await bcrypt.compare(password, user?.password!)
+    if (!isMatch){  res.status(400).json({ msg:"Invalid password" }); return}
 
     //get keypair
-    const keypair = await getKeypair(user?.mnemonic!, user?.password!)
+    const keypair = await getKeypair(user?.mnemonic!, password)
     //constructing transaction block
     const payment = await extractPayment(product.price, keypair) //payment coin
+    if(!payment){
+        res.status(500).json({error:"not enough funds"})
+        return;
+    }
     const tx = payment && await createOrderTx(product, payment) //transaction object to be signed
 
     if (tx){
-         res.status(200).json({Transaction:tx})
+        const serializedTx = await tx.toJSON()
+        res.status(200).json({serializedTransaction: serializedTx})
+        return
     }
-     res.status(500).json({error:"internal server error"})
+    res.status(500).json({error:"internal server error"})
 }
 
 export const getAll = async (req: Request, res: Response) => {

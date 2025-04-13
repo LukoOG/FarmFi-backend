@@ -1,9 +1,17 @@
 import { client } from "./sui-constants";
 
-export const getOwnedCoins = async (wallet: string) => {
+//return the payment that was created
+export const getSplitCoin = async (wallet: string, amount:number) => {
     const coins = await client.getCoins({
         owner: wallet,
     });
-    // console.log(coins.data.find(coin=>coin.balance == 4*sui_conversion));
-    return coins.data.pop();
+    let ownedCoins = coins.data
+    if(Number(ownedCoins[0].balance) != amount){
+        for(const coin of ownedCoins){
+            if(Number(coin.balance) == amount){
+                return coin
+            }
+        }
+    }
+    return ownedCoins[0]
 }

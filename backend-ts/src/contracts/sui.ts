@@ -2,7 +2,7 @@ import { IProduct } from "../models/Product";
 
 import { Transaction } from "@mysten/sui/transactions";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519"
-import { getOwnedCoins } from "./sui-utils";
+import { getSplitCoin } from "./sui-utils";
 
 import { sui_conversion, client } from "./sui-constants";
 
@@ -29,9 +29,10 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     let destination_coin = ownedCoins[0] //splitting the payment from their first coin object
     for(let i = 1; i <= ownedCoins.length; i++){
         if (Number(destination_coin.balance) < price){
-            console.log('herer')
+            console.log('herer',ownedCoins[i])
             tx.mergeCoins(tx.object(destination_coin.coinObjectId), [tx.object(ownedCoins[i].coinObjectId)])
-        }else if(Number(destination_coin.balance) > price){
+            console.log('res',destination_coin.balance)
+        }else if(Number(destination_coin.balance) >= price){
             console.log('here1')
             const [paymentCoin] = tx.splitCoins(tx.object(destination_coin.coinObjectId), [price])
             tx.transferObjects([paymentCoin], wallet);
@@ -39,10 +40,12 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
         }
     }
     
+    console.log('assa')
     tx.setGasBudget(100000000)
     const result = await client.signAndExecuteTransaction({signer: keypair, transaction: tx});
     await client.waitForTransaction({digest: result.digest});
-    let coin = await getOwnedCoins(wallet)
+    let coin = await getSplitCoin(wallet, price)
+    console.log(coin)
     return coin
 }
 
