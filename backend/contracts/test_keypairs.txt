@@ -1,1 +1,0 @@
-wallet address: 0x88af0b7da4e2f601e365168b6c8d0b726a20718a4fc9bf16c2e393cb4d05724f, private_key: suiprivkey1qqmr80d558vgnrafw8he9w0yhtdrn0sh06xfrcg2mvn7l2m34shfz6g46f4

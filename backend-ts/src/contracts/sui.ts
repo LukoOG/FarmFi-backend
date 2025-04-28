@@ -12,6 +12,7 @@ interface IProductWithFarmerAddress extends IProduct {
 
 //todo, create a function that goes through the wallet with 2 coins of value 10 and gets a coin of value 13
 //won't work for just 1 coin
+//Delibate on whether it should be on the frontend
 export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     const price: number = prc * sui_conversion
     const wallet = keypair.getPublicKey().toSuiAddress()
