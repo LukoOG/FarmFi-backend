@@ -38,12 +38,12 @@ app.use(express.json());
 app.use(cookieParser());
 
 connectDB()
-setInterval(() => {
-    if (global.gc) {
-      global.gc();
-      console.log("✅ Garbage collection forced");
-    }
-  }, 60000);
+// setInterval(() => {
+//     if (global.gc) {
+//       global.gc();
+//       console.log("✅ Garbage collection forced");
+//     }
+//   }, 60000);
 
 //app routes
 app.use("/auth", authRoutes)
