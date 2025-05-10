@@ -36,12 +36,12 @@ export const createOrder = async (req: Request, res: Response) => {
     const isMatch = await bcrypt.compare(password, user?.password!)
     if (!isMatch){  res.status(400).json({ msg:"Invalid password" }); return}
 
-    //get keypair
+    //get keypair; frontend should
     const keypair = await getKeypair(user?.mnemonic!, password)
     //constructing transaction block
     const payment = await extractPayment(product.price, keypair) //payment coin
     if(!payment){
-        res.status(500).json({error:"not enough funds"})
+        res.status(200).json({error:"not enough funds"})
         return;
     }
     const tx = payment && await createOrderTx(product, payment) //transaction object to be signed

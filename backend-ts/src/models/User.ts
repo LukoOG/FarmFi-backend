@@ -25,7 +25,7 @@ const UserSchema = new Schema<IUser>({
     password: { type: String, required: true },
     role: { type: String, enum: ["buyer", "farmer", "logistics_admin"], required: true },
     location: { type: String, required: false},
-    suiWalletAddress: { type: String }, // Store generated wallet address
+    suiWalletAddress: { type: String }, // Store generated wallet address zkogin or traditional
     mnemonic: { type: String }, //Store encrypted mnemonic
     zkLoginAddress: { type: String },
     kycVerified: { type: Boolean, default: false }, // Future KYC verification
