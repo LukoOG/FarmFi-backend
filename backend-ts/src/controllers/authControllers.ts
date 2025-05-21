@@ -1,14 +1,22 @@
 import { Request, Response } from "express";
 import { decryptMnemonic, encryptMnemonic } from "../utils/authUtils";
+import crypto from  "crypto"
 
 import * as bcrypt from "bcrypt"
 import * as bip39 from "bip39"
 import * as jwt from "jsonwebtoken"
-
+import {
+    genAddressSeed,
+    generateNonce,
+    generateRandomness,
+    jwtToAddress,
+    getZkLoginSignature,
+    getExtendedEphemeralPublicKey,
+} from "@mysten/sui/zklogin";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { derivePath } from "ed25519-hd-key";
 
-import { User, IUser, SafeUser } from "../models/User";
+import { User, IUser, SafeUser, IZkLoginInfo } from "../models/User";
 
 import "dotenv/config";
 
@@ -98,13 +106,16 @@ The zklogin workflow is in two parts A and B
 
 A(Address derivation)
 i. After receiving jwt payload from oauth provider we retrieve the iss, sub and aud
-ii. Generate an Ephemeral keypair(eKP) for one time validation, the max epoch(mE) which is the validity
+ii. Generate an Ephemeral keypair(eKP) for signing transactions stored in sesion, the max epoch(mE) which is the validity
     period of the ephemeral keypair and randomness from te provided generateRandomness function of mysten labs
+    note: (1 epoch ~= 24h)
 iii.  We then generate nonce using the 3 parameters from step 2. Note: we use the public key from .getPublicKey() and
         not the whole keypair
 iv. We compute a salt which will be associated with the zklogin address. Note: this is similar to mnemonics, if lost, the
     addres is also lost.
 v. Finally we provide the jwtpayload and salt to the jwtToAddress function from mysten labs to generate their address
+
+Note: nonce is given to the oauth provider to generate the jwt...frontend implementation
 B.(Signing transactions)
 i.  We first get the zkproof using the extended ephemeral keypair of the generated keypair (eKP) from earlier or a new keypair
     and send a request to Sui's backed servce to get get the proof as so:  
@@ -133,4 +144,19 @@ ii. We then assemble the signature using an address seed gotten from the jwt pay
     Note: Each ZK Proof is associated with an ephemeral key pair. Stored in the appropriate location, 
     it can be reused as proof to sign any number of transactions until the ephemeral key pair expires.
  */
+type OauthPayload = {
+    provider: string,
+    sub: string,
+    aud: string,
+    [key: string]: any // for all the other JWT fields
+}
 
+export const generateSalt =  (): string => {
+    const buf = crypto.randomBytes(16);
+    const salt = BigInt('0x' + buf.toString('hex'));
+    return salt.toString(); // decimal string
+}
+
+const signTransaction = async () => {
+
+}

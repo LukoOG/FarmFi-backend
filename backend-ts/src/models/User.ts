@@ -6,17 +6,24 @@ const status = [
     "Cancelled",
 ] as const;
 
+export interface IZkLoginInfo {
+  sub: string;
+  salt: string;
+}
+
 export interface IUser extends Document{
     name: string;
-    email: string;
-    password: string;
+    email: string | null;
+    password: string | null;
     role: string;
     location: string;
     suiWalletAddress: string;
     mnemonic?: string;
-    zkLoginAddress?: string;
+    zkLogin: IZkLoginInfo | null,
     kycVerified: boolean;
+    farm?: mongoose.Types.ObjectId;
 }
+
 export type SafeUser = Omit<IUser, "password" | "mnemonic">;
 
 const UserSchema = new Schema<IUser>({
@@ -27,8 +34,14 @@ const UserSchema = new Schema<IUser>({
     location: { type: String, required: false},
     suiWalletAddress: { type: String }, // Store generated wallet address zkogin or traditional
     mnemonic: { type: String }, //Store encrypted mnemonic
-    zkLoginAddress: { type: String },
+    zkLogin: {type:
+      {
+        sub: String,
+        salt: String,
+      }
+    },
     kycVerified: { type: Boolean, default: false }, // Future KYC verification
+    farm: { type: Schema.Types.ObjectId, ref: "Farm" }
 })
 
 UserSchema.set("toJSON", {
@@ -39,5 +52,11 @@ UserSchema.set("toJSON", {
     }
 })
 
-export const User = mongoose.model<IUser>("User", UserSchema)
+UserSchema.pre("save", function (next) {
+  if (this.role !== "farmer" && this.farm) {
+    return next(new Error("Only farmers can have a farm"));
+  }
+  next();
+});
 
+export const User = mongoose.model<IUser>("User", UserSchema)

@@ -4,12 +4,12 @@ module contracts::FarmFi;
 use sui::sui::SUI;
 use sui::coin::{Coin};
 // use sui::balance::{Self, Balance};
-
 use sui::event;
 
 use std::string::String;
 
 use contracts::config;
+use contracts::lock::{Self, Locked, Key};
 // use contracts::Product::Product;
 
 public enum Status has store, drop, copy{
@@ -20,7 +20,11 @@ public enum Status has store, drop, copy{
 }
 
 
-public struct OrderCreated has copy, drop{order_id: address}
+public struct OrderCreated has store{
+    id: UID,
+    buyer: address,
+    recipient: address,
+    }
 
 public struct Product has store, drop{
     offchain_id: String,
@@ -28,22 +32,24 @@ public struct Product has store, drop{
     farmer: address
 }
 
-public struct Order has key{
+public struct Order<T: key+store> has store, key{
     id: UID,
     farmer: address,
     buyer: address,
     product: Product,
     status: Status,
-    escrow: Coin<SUI>
+    escrow: Option<T>,
+    exchange_key: ID,
 }
 
-///creates the order on the blockchain
+///creates the order on the blockchain, buyer sends create request
 public fun create_order(
-    // product: Product, gats pass in the individual fields
+    // product: Product, have to pass in the individual fields
     offchain_id: String,
     price: u64,
     farmer: address,
-    buyer_payment: Coin<SUI>,
+    buyer_payment: Coin<T>,
+    exchange_key: ID,
     ctx: &mut TxContext
 ): ID{
     //check cases
@@ -62,7 +68,8 @@ public fun create_order(
         buyer:  ctx.sender(),
         product,
         status: Status::Pending,
-        escrow: buyer_payment,
+        escrow: option::some(buyer_payment),
+        exchange_key,
         };
     //emitted event for off-chain sync
     let order_address = object::uid_to_address(&order.id);

@@ -50,10 +50,10 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     return coin
 }
 
-export const createOrderTx = async (product:IProductWithFarmerAddress, payment:any) => {
+export const createOrderTx = async (product:IProductWithFarmerAddress, payment:any, key:string) => {
     let _product = {
         offchain_id: product._id.toString(),
-        price: Number(product.price),
+        price: Number(product.price), 
         farmer: product.suiWalletAddress, //farmer address stored in mongodb
     }
         
@@ -66,6 +66,7 @@ export const createOrderTx = async (product:IProductWithFarmerAddress, payment:a
             tx.pure.u64(_product.price), 
             tx.pure.address(_product.farmer),
             tx.object(payment),
+            tx.object(key),
         ],
         typeArguments: [],
     })
