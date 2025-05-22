@@ -1,2 +1,6 @@
 /node_modules
 package-lock.json
+
+/src/crypto_test.js
+/src/example_front.js
+/src/fiat_test.js

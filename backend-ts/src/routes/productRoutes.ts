@@ -8,6 +8,7 @@ router.post("/create/multiple", upload.array("images", 10), createMultipleProduc
 router.get("/all", getAll)
 router.get("/:id", getByID)
 router.put("/update/:id", updateProduct)
+
 router.delete("/delete/:id", deleteProduct)
 
 export default router
