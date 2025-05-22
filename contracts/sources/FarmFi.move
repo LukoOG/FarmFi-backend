@@ -10,6 +10,7 @@ use std::string::String;
 
 use contracts::config;
 use contracts::lock::{Self, Locked, Key};
+use contracts::config::error_NotFarmerOrder;
 // use contracts::Product::Product;
 
 public enum Status has store, drop, copy{
@@ -32,18 +33,19 @@ public struct Product has store, drop{
     farmer: address
 }
 
+//expand to accomodate unlock key
 public struct Order<T: key+store> has store, key{
     id: UID,
     farmer: address,
     buyer: address,
     product: Product,
     status: Status,
-    escrow: Option<T>,
-    exchange_key: ID,
+    escrow: Option<Coin<T>>,
+    // exchange_key: ID,
 }
 
 ///creates the order on the blockchain, buyer sends create request
-public fun create_order(
+public fun create_order<T>(
     // product: Product, have to pass in the individual fields
     offchain_id: String,
     price: u64,
@@ -69,7 +71,6 @@ public fun create_order(
         product,
         status: Status::Pending,
         escrow: option::some(buyer_payment),
-        exchange_key,
         };
     //emitted event for off-chain sync
     let order_address = object::uid_to_address(&order.id);
@@ -79,8 +80,9 @@ public fun create_order(
 }
 
 //completes an order and releases escrow to the farmer
-public fun complete_order(order: &mut Order, ctx: &mut TxContext){
+public fun complete_order<T: store+key>(order: &mut Order<T>, ctx: &mut TxContext){
     assert!(order.status == Status::Pending, config::error_OrderNotPending());
+    assert!(order.farmer == ctx.sender(), config::error_NotFarmerOrder());
     // assert!(order.farmer == signer::address_of(farmer), config::error_NotFarmerOrder());
 
     let v_u = order.escrow.value();

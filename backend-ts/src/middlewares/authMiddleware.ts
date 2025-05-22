@@ -3,7 +3,7 @@ import "dotenv/config"
 import { Request, Response, NextFunction } from "express";
 
 
-export function (req: Request, res:Response, next:NextFunction) {
+export function decodeUser(req: Request, res:Response, next:NextFunction) {
   const token = req.header("Authorization");
   if (!token) return res.status(401).json({ msg: "No token, authorization denied" });
 

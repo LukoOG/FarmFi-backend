@@ -19,6 +19,7 @@ import { derivePath } from "ed25519-hd-key";
 import { User, IUser, SafeUser, IZkLoginInfo } from "../models/User";
 
 import "dotenv/config";
+import { Keypair } from "@mysten/sui/dist/cjs/cryptography";
 
 export const register = async (req: Request, res: Response) => {
     try{
@@ -72,7 +73,7 @@ export const login = async (req: Request, res: Response) => {
         if (!user)  res.status(400).json({ msg: "User does not exist" });
 
         //check password
-        const isMatch = bcrypt.compare(password, user.password)
+        const isMatch = bcrypt.compare(password, user.password as string)
         if (!isMatch)  res.status(400).json({ msg:"Invalid credentials" })
 
         let userObj = user.toJSON() as SafeUser
@@ -101,6 +102,30 @@ export const refresh_token = async () => {
 
 }
 
+export const getkeypair = async (req: Request, res:Response) => {
+    try{
+        const { email, password } = req.body
+
+        //get the user
+        const user = await User.findOne({email}) as IUser
+        if (!user){
+            res.status(400).json({ msg: "User does not exist" })
+            return;
+        };
+        
+        const isMatch = bcrypt.compare(password, user.password as string)
+        if (!isMatch){
+            res.status(400).json({ msg:"Invalid credentials" })
+            return;
+        }
+
+        res.status(200).json({keypair: decryptMnemonic(user.mnemonic as string, password)})
+        return
+    } catch(error){
+        res.status(500).json({error:"error getting user keypair"})
+        console.log(error)
+    }
+}
 /* 
 The zklogin workflow is in two parts A and B
 
