@@ -1,5 +1,6 @@
 /node_modules
 package-lock.json
+.env
 
 /src/crypto_test.js
 /src/example_front.js
