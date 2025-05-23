@@ -1,3 +1,4 @@
+import { error } from "console";
 import { Product, IProduct } from "../models/Product";
 import { Request, Response } from "express";
 
@@ -63,13 +64,25 @@ export const getByID = async (req:Request, res:Response) => {
         res.status(500).json({ error: error });
     }
 }
+
+export const getByFarmer = async (req:Request, res:Response) => {
+    try{
+        const products = await Product.find({"farmer":req.params.id}).populate("farmer")
+        if (!products) res.status(400).json({error:"Product not found"})
+        res.status(200).json({products})
+    } catch(error){
+        res.status(500).json({ error: error });
+    }
+}
+
 export const updateProduct = async (req:Request, res:Response) => {
     try{
+        // console.log(req)
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
-        console.log(req.body)
         if (!product) {res.status(400).json({error:"no product found"}); return}
         res.status(200).json({msg:"product updated", product:product})
     } catch(error){
+        console.log(error)
         res.status(500).json({ error: error})
     }
 }
@@ -80,6 +93,7 @@ export const deleteProduct = async (req:Request, res:Response) => {
         if (!product) {res.status(400).json({error:"no product found"}); return}
         res.status(200).json({msg:"product deleted"})
     } catch (err: unknown) {
+        res.status(500).json({error: err})
         console.log( err );
     }
 }
