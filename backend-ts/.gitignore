@@ -5,3 +5,6 @@ package-lock.json
 /src/crypto_test.js
 /src/example_front.js
 /src/fiat_test.js
+/src/createOrder.ts
+/src/sui_test.js
+/src/test_keypairs.txt

@@ -21,6 +21,7 @@ export const getOrder = async (req: Request, res: Response) => {
     }
 }
 
+//ability to process multpled products from different farmers
 export const createOrder = async (req: Request, res: Response) => {
     const { buyer, product, password } = req.body //expected information
     //cases to abort operation
@@ -36,7 +37,7 @@ export const createOrder = async (req: Request, res: Response) => {
     const isMatch = await bcrypt.compare(password, user?.password!)
     if (!isMatch){  res.status(400).json({ msg:"Invalid password" }); return}
 
-    //get keypair; frontend should
+    //get keypair; frontend should deal with extracting payment coin to maintaini decentralization
     const keypair = await getKeypair(user?.mnemonic!, password)
     //constructing transaction block
     const payment = await extractPayment(product.price, keypair) //payment coin

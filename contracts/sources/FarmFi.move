@@ -9,8 +9,7 @@ use sui::event;
 use std::string::String;
 
 use contracts::config;
-use contracts::lock::{Self, Locked, Key};
-use contracts::config::error_NotFarmerOrder;
+// use contracts::lock::{Self, Locked, Key};
 // use contracts::Product::Product;
 
 public enum Status has store, drop, copy{
@@ -21,7 +20,7 @@ public enum Status has store, drop, copy{
 }
 
 
-public struct OrderCreated has store{
+public struct OrderCreated has store, key{
     id: UID,
     buyer: address,
     recipient: address,
@@ -34,41 +33,39 @@ public struct Product has store, drop{
 }
 
 //expand to accomodate unlock key
-public struct Order<T: key+store> has store, key{
+public struct Order<T> has store, key{
     id: UID,
     farmer: address,
     buyer: address,
-    product: Product,
+    offchain_id: String,
     status: Status,
     escrow: Option<Coin<T>>,
     // exchange_key: ID,
 }
 
 ///creates the order on the blockchain, buyer sends create request
+/// no longer storing the product information, just the order id on mongoDB that will contain the order information
 public fun create_order<T>(
-    // product: Product, have to pass in the individual fields
     offchain_id: String,
-    price: u64,
     farmer: address,
     buyer_payment: Coin<T>,
-    exchange_key: ID,
     ctx: &mut TxContext
 ): ID{
     //check cases
     assert!(buyer_payment.value() == price, config::error_PriceMismatch());
     assert!(farmer != ctx.sender(), config::error_InvalidSelfTrade());
 
-    let product = Product{
-        offchain_id,
-        price,
-        farmer,
-    };
+    // let product = Product{
+    //     offchain_id,
+    //     price,
+    //     farmer,
+    // };
 
     let order = Order{
         id: object::new(ctx),
         farmer: product.farmer,
         buyer:  ctx.sender(),
-        product,
+        offchain_id,
         status: Status::Pending,
         escrow: option::some(buyer_payment),
         };

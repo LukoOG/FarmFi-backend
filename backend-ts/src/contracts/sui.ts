@@ -50,6 +50,7 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     return coin
 }
 
+
 export const createOrderTx = async (product:IProductWithFarmerAddress, payment:any) => {
     let _product = {
         offchain_id: product._id.toString(),

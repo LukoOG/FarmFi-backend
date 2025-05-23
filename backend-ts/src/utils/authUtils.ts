@@ -35,7 +35,7 @@ export const decryptMnemonic = (encryptedMnemonic: string, password: string) => 
 }
 }
 
-export const getKeypair = async (mnemonic: string, password: string) => {
+export const getKeypair = async (mnemonic: string, password: string): Promise<Ed25519Keypair> => {
     //decrypt mnemonic and generte keypair
     const decryptedMnemonic = decryptMnemonic(mnemonic, password)
     const seed = bip39.mnemonicToSeedSync(decryptedMnemonic);

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { decryptMnemonic, encryptMnemonic } from "../utils/authUtils";
+import { decryptMnemonic, encryptMnemonic, getKeypair } from "../utils/authUtils";
 import crypto from  "crypto"
 
 import * as bcrypt from "bcrypt"
@@ -119,7 +119,9 @@ export const getkeypair = async (req: Request, res:Response) => {
             return;
         }
 
-        res.status(200).json({keypair: decryptMnemonic(user.mnemonic as string, password)})
+        const keypair = await getKeypair(user.mnemonic as string, password)
+
+        res.status(200).json({keypair: keypair})
         return
     } catch(error){
         res.status(500).json({error:"error getting user keypair"})
