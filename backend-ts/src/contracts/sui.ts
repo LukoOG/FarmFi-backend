@@ -3,7 +3,7 @@ import { IProduct } from "../models/Product";
 import { Transaction } from "@mysten/sui/transactions";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519"
 import { getSplitCoin } from "./sui-utils";
-
+import { CoinStruct } from "@mysten/sui/dist/cjs/client";
 import { sui_conversion, client } from "./sui-constants";
 
 interface IProductWithFarmerAddress extends IProduct {
@@ -56,7 +56,7 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
 }
 
 
-export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_id: string, payment:any, keypair: Ed25519Keypair) => {
+export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_id: string, payment:CoinStruct, keypair: Ed25519Keypair) => {
     let _product = {
         offchain_id: product._id.toString(),
         price: Number(product.price), 
@@ -70,7 +70,7 @@ export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_
         arguments: [
             tx.pure.string(offchain_id),
             tx.pure.address(_product.farmer),
-            tx.object(payment),
+            tx.object(payment.coinObjectId),
         ],
         typeArguments: [],
     })
