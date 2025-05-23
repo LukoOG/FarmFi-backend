@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 import * as bcrypt from "bcrypt"
 import { getKeypair } from "../utils/authUtils";
 import { createOrderTx, extractPayment } from "../contracts/sui";
-import { Product } from "../models/Product";
+import { IProduct, Product } from "../models/Product";
 
 export const getOrder = async (req: Request, res: Response) => {
     //adjust according to frontend needs
@@ -34,12 +34,12 @@ export const createOrder = async (req: Request, res: Response) => {
         return;
     }
 
-    const prod = Product.findById(product._id)
+    const prod = await Product.findById(product._id)
 
     const order = new Order({
         farmer: product.farmer,
         buyer:  user.id,
-        product: [prod]
+        product: [prod?.id]
     })
 
     await order.save()
