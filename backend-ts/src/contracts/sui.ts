@@ -63,8 +63,7 @@ export const createOrderTx = async (product:IProductWithFarmerAddress, payment:a
     tx.moveCall({
         target: target_smc,
         arguments: [
-            tx.pure.string(_product.offchain_id), 
-            tx.pure.u64(_product.price), 
+            tx.pure.string(_product.offchain_id),
             tx.pure.address(_product.farmer),
             tx.object(payment),
         ],

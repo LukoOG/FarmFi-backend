@@ -102,6 +102,7 @@ export const refresh_token = async () => {
 
 }
 
+//development testing. Sending keypair bytes
 export const getkeypair = async (req: Request, res:Response) => {
     try{
         const { email, password } = req.body
@@ -121,7 +122,11 @@ export const getkeypair = async (req: Request, res:Response) => {
 
         const keypair = await getKeypair(user.mnemonic as string, password)
 
-        res.status(200).json({keypair: keypair})
+        //coding to bytes
+        const secretKey = keypair.getSecretKey(); // Uint8Array
+        const encodedKey = Buffer.from(secretKey).toString('base64');
+
+        res.status(200).json({keypair: encodedKey})
         return
     } catch(error){
         res.status(500).json({error:"error getting user keypair"})
