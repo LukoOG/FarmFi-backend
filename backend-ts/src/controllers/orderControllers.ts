@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import * as bcrypt from "bcrypt"
 import { getKeypair } from "../utils/authUtils";
 import { createOrderTx, extractPayment } from "../contracts/sui";
+import { Product } from "../models/Product";
 
 export const getOrder = async (req: Request, res: Response) => {
     //adjust according to frontend needs
@@ -33,6 +34,17 @@ export const createOrder = async (req: Request, res: Response) => {
         return;
     }
 
+    const prod = Product.findById(product._id)
+
+    const order = new Order({
+        farmer: product.farmer,
+        buyer:  user,
+        product: [prod]
+    })
+
+    await order.save()
+    let order_id = order.id
+
     //construct the keypair
     const isMatch = await bcrypt.compare(password, user?.password!)
     if (!isMatch){  res.status(400).json({ msg:"Invalid password" }); return}
@@ -45,7 +57,7 @@ export const createOrder = async (req: Request, res: Response) => {
         res.status(200).json({error:"not enough funds"})
         return;
     }
-    const tx = payment && await createOrderTx(product, payment) //transaction object to be signed
+    const tx = payment && await createOrderTx(product, order_id, payment) //transaction object to be signed
 
     if (tx){
         const serializedTx = await tx.toJSON()

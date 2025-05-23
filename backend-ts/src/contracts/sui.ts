@@ -50,7 +50,7 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
 }
 
 
-export const createOrderTx = async (product:IProductWithFarmerAddress, payment:any) => {
+export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_id: string, payment:any) => {
     let _product = {
         offchain_id: product._id.toString(),
         price: Number(product.price), 
@@ -62,7 +62,7 @@ export const createOrderTx = async (product:IProductWithFarmerAddress, payment:a
     tx.moveCall({
         target: target_smc,
         arguments: [
-            tx.pure.string(_product.offchain_id),
+            tx.pure.string(offchain_id),
             tx.pure.address(_product.farmer),
             tx.object(payment),
         ],
