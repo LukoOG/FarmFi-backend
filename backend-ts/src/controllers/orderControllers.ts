@@ -39,7 +39,9 @@ export const createOrder = async (req: Request, res: Response) => {
     const order = new Order({
         farmer: product.farmer,
         buyer:  user.id,
-        product: [prod?.id]
+        product: [prod?.id],
+        totalPrice: 12,
+        
     })
 
     await order.save()
