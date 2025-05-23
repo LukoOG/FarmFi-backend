@@ -56,7 +56,7 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
 }
 
 
-export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_id: string, payment:any) => {
+export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_id: string, payment:any, keypair: Ed25519Keypair) => {
     let _product = {
         offchain_id: product._id.toString(),
         price: Number(product.price), 
@@ -75,6 +75,15 @@ export const createOrderTx = async (product:IProductWithFarmerAddress, offchain_
         typeArguments: [],
     })
     tx.setGasBudget(10000000)
+    const result = await client.signAndExecuteTransaction({
+        signer: keypair,
+        transaction: tx,
+        options:{
+            showEffects: true,
+            showObjectChanges: true,
+        }
+    })
+    await client.waitForTransaction({digest: result.digest});
 
-    return tx
+    return result
 }

@@ -41,7 +41,7 @@ export const createOrder = async (req: Request, res: Response) => {
         buyer:  user.id,
         product: [prod?.id],
         totalPrice: 12,
-        
+
     })
 
     await order.save()
@@ -59,11 +59,12 @@ export const createOrder = async (req: Request, res: Response) => {
         res.status(200).json({error:"not enough funds"})
         return;
     }
-    const tx = payment && await createOrderTx(product, order_id, payment) //transaction object to be signed
+    const tx = payment && await createOrderTx(product, order_id, payment,keypair) //transaction object to be signed
 
     if (tx){
-        const serializedTx = await tx.toJSON()
-        res.status(200).json({serializedTransaction: serializedTx})
+        // const serializedTx = await tx.toJSON()
+        // res.status(200).json({serializedTransaction: serializedTx})
+        res.status(200).json({serializedTransaction: tx})
         return
     }
     res.status(500).json({error:"internal server error"})
