@@ -38,7 +38,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
     const order = new Order({
         farmer: product.farmer,
-        buyer:  user,
+        buyer:  user.id,
         product: [prod]
     })
 

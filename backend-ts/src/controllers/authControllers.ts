@@ -125,8 +125,6 @@ export const getkeypair = async (req: Request, res:Response) => {
 
         //coding to bytes
         const secretKey = keypair.getSecretKey(); // Uint8Array
-        console.log(secretKey)
-        // const encodedKey = toBase64(secretKey);
 
         res.status(200).json({keypair: secretKey})
         return
