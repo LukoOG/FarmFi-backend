@@ -20,6 +20,7 @@ import { User, IUser, SafeUser, IZkLoginInfo } from "../models/User";
 
 import "dotenv/config";
 import { Keypair } from "@mysten/sui/dist/cjs/cryptography";
+import { toBase64 } from "@mysten/sui/utils"
 
 export const register = async (req: Request, res: Response) => {
     try{
@@ -123,10 +124,10 @@ export const getkeypair = async (req: Request, res:Response) => {
         const keypair = await getKeypair(user.mnemonic as string, password)
 
         //coding to bytes
-        const secretKey = keypair.getSecretKey().splice(0, 32); // Uint8Array
-        const encodedKey = Buffer.from(secretKey).toString('base64');
+        const secretKey = keypair.getSecretKey(); // Uint8Array
+        // const encodedKey = toBase64(secretKey);
 
-        res.status(200).json({keypair: encodedKey})
+        res.status(200).json({keypair: secretKey})
         return
     } catch(error){
         res.status(500).json({error:"error getting user keypair"})
