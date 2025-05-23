@@ -46,7 +46,6 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     const result = await client.signAndExecuteTransaction({signer: keypair, transaction: tx});
     await client.waitForTransaction({digest: result.digest});
     let coin = await getSplitCoin(wallet, price)
-    console.log(coin)
     return coin
 }
 

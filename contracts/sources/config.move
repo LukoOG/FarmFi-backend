@@ -23,4 +23,3 @@ public fun error_PriceMismatch():u64 {EPriceMismatch}
 public fun error_InvalidSelfTrade():u64 {EInvalidSelfTrade}
 
 //structs
-public struct OrderCreated has copy, drop{order_id: address}

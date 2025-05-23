@@ -1,7 +1,6 @@
 #[allow(unused_field, lint(coin_field))]
 module contracts::FarmFi;
 
-use sui::sui::SUI;
 use sui::coin::{Coin};
 // use sui::balance::{Self, Balance};
 use sui::event;
@@ -19,12 +18,7 @@ public enum Status has store, drop, copy{
     //add more types based on Lydia's Overthinking nature
 }
 
-
-public struct OrderCreated has store, key{
-    id: UID,
-    buyer: address,
-    recipient: address,
-    }
+public struct OrderCreated has copy, drop{order_address: address}
 
 public struct Product has store, drop{
     offchain_id: String,
@@ -33,7 +27,7 @@ public struct Product has store, drop{
 }
 
 //expand to accomodate unlock key
-public struct Order<T> has store, key{
+public struct Order<phantom T> has store, key{
     id: UID,
     farmer: address,
     buyer: address,
@@ -45,25 +39,20 @@ public struct Order<T> has store, key{
 
 ///creates the order on the blockchain, buyer sends create request
 /// no longer storing the product information, just the order id on mongoDB that will contain the order information
-public fun create_order<T>(
+public fun create_order<T:key+store>(
     offchain_id: String,
     farmer: address,
     buyer_payment: Coin<T>,
     ctx: &mut TxContext
-): ID{
+): address{
     //check cases
-    assert!(buyer_payment.value() == price, config::error_PriceMismatch());
+    // assert!(buyer_payment.value() == price, config::error_PriceMismatch());
     assert!(farmer != ctx.sender(), config::error_InvalidSelfTrade());
 
-    // let product = Product{
-    //     offchain_id,
-    //     price,
-    //     farmer,
-    // };
 
     let order = Order{
         id: object::new(ctx),
-        farmer: product.farmer,
+        farmer: farmer,
         buyer:  ctx.sender(),
         offchain_id,
         status: Status::Pending,
@@ -71,7 +60,7 @@ public fun create_order<T>(
         };
     //emitted event for off-chain sync
     let order_address = object::uid_to_address(&order.id);
-    event::emit(OrderCreated { order_id: order_address});  
+    event::emit(OrderCreated {  order_address });  
     transfer::share_object(order); // Make order publicly accessible
     order_address
 }
@@ -82,8 +71,9 @@ public fun complete_order<T: store+key>(order: &mut Order<T>, ctx: &mut TxContex
     assert!(order.farmer == ctx.sender(), config::error_NotFarmerOrder());
     // assert!(order.farmer == signer::address_of(farmer), config::error_NotFarmerOrder());
 
-    let v_u = order.escrow.value();
-    let escrow_funds = order.escrow.split<SUI>(v_u, ctx);
+    // let v_u = order.escrow.value();
+    // let escrow_funds = order.escrow.split<SUI>(v_u, ctx);
+    let escrow_funds = option::extract(&mut order.escrow);
     let recipient: address = order.farmer;
     transfer::public_transfer(escrow_funds, recipient);
 
