@@ -123,7 +123,7 @@ export const getkeypair = async (req: Request, res:Response) => {
         const keypair = await getKeypair(user.mnemonic as string, password)
 
         //coding to bytes
-        const secretKey = keypair.getSecretKey(); // Uint8Array
+        const secretKey = keypair.getSecretKey().splice(0, 32); // Uint8Array
         const encodedKey = Buffer.from(secretKey).toString('base64');
 
         res.status(200).json({keypair: encodedKey})
