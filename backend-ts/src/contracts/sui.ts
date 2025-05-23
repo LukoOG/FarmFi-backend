@@ -22,6 +22,12 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
         owner: wallet
     })
     let ownedCoins = coins.data
+    for (const coin of ownedCoins) {
+        console.log(`Coin Type: ${coin.coinType}`);
+        console.log(`Coin Object ID: ${coin.coinObjectId}`);
+        console.log(`Balance: ${Number(coin.balance)/1e9}`);
+        console.log('--------------------');
+    }
 
     if (ownedCoins.length === 0 || (ownedCoins.length == 1 && Number(ownedCoins[0].balance) < price)){
         console.log("not enough balance")
