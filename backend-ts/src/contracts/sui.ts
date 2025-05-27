@@ -22,12 +22,6 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
         owner: wallet
     })
     let ownedCoins = coins.data
-    for (const coin of ownedCoins) {
-        console.log(`Coin Type: ${coin.coinType}`);
-        console.log(`Coin Object ID: ${coin.coinObjectId}`);
-        console.log(`Balance: ${Number(coin.balance)/1e9}`);
-        console.log('--------------------');
-    }
 
     if (ownedCoins.length === 0 || (ownedCoins.length == 1 && Number(ownedCoins[0].balance) < price)){
         console.log("not enough balance")
@@ -36,21 +30,17 @@ export const extractPayment = async (prc: number, keypair:Ed25519Keypair) => {
     let destination_coin = ownedCoins[0] //splitting the payment from their first coin object
     for(let i = 1; i <= ownedCoins.length; i++){
         if (Number(destination_coin.balance) < price){
-            console.log('herer',ownedCoins[i])
             tx.mergeCoins(tx.object(destination_coin.coinObjectId), [tx.object(ownedCoins[i].coinObjectId)])
-            console.log('res',destination_coin.balance)
         }else if(Number(destination_coin.balance) >= price){
-            console.log('here1')
             const [paymentCoin] = tx.splitCoins(tx.object(destination_coin.coinObjectId), [price])
             tx.transferObjects([paymentCoin], wallet);
             break;
         }
     }
-    
-    console.log('assa')
+
     tx.setGasBudget(100000000)
-    const result = await client.signAndExecuteTransaction({signer: keypair, transaction: tx});
-    await client.waitForTransaction({digest: result.digest});
+    const { digest } = await client.signAndExecuteTransaction({signer: keypair, transaction: tx});
+    await client.waitForTransaction({digest: digest});
     let coin = await getSplitCoin(wallet, price)
     return coin
 }
