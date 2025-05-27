@@ -1,10 +1,11 @@
-import { error } from "console";
-import { Product, IProduct } from "../models/Product";
+
+import { Product } from "../models/Product";
 import { Request, Response } from "express";
 
 //api endpoints
 export const createProduct = async(req: Request, res: Response) => {
-        const { name, description, price, stock, category, farmer, weight} = req.body;
+    try{
+                const { name, description, price, stock, category, farmer, weight} = req.body;
         const imageUrl = req.file ? req.file.path : null;
         const product = new Product({
             name,
@@ -18,6 +19,9 @@ export const createProduct = async(req: Request, res: Response) => {
         })
         await product.save()
         res.status(200).json({product})
+    } catch(error){
+        res.status(500).json({error})
+    }
 }
 
 export const createMultipleProducts = async(req: Request, res: Response) => {
@@ -68,7 +72,7 @@ export const getByID = async (req:Request, res:Response) => {
 export const getByFarmer = async (req:Request, res:Response) => {
     try{
         const products = await Product.find({"farmer":req.params.id}).populate("farmer")
-        if (!products) res.status(400).json({error:"Product not found"})
+        if (!products) {res.status(400).json({error:"Product not found"}); return}
         res.status(200).json({products})
     } catch(error){
         res.status(500).json({ error: error });

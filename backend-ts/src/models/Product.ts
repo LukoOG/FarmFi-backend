@@ -6,6 +6,11 @@ const categories =[
     "others",
 ] as const;
 
+type Review = {
+    user: string,
+    review: string,
+}
+
 export interface IProduct extends Document{
     _id: mongoose.Types.ObjectId;
     name: string;
@@ -15,8 +20,12 @@ export interface IProduct extends Document{
     location?: string;
     category: typeof categories[number];
     weight: number;
+    stock: number;
     imgUrl?: string;
     available: boolean;
+    rating: number;
+    reviews?: Review[];
+    relatedCommodities?: string[];
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -27,8 +36,17 @@ const ProductSchema = new Schema<IProduct>({
     location: { type: String },
     category: { type: String, enum: categories, required:true },
     weight: { type: Number, required:true },
+    stock: { type: Number, required:true },
     imgUrl: { type: String },
     available: { type: Boolean, required:true, default:true},
+    rating: { type: Number, default:0 },
+    reviews: [
+        {type: {
+        naqme: String,
+        review: String,
+    }}
+    ],
+    relatedCommodities: [{type: String}]
 })
 
 export const Product = mongoose.model<IProduct>("Product", ProductSchema)

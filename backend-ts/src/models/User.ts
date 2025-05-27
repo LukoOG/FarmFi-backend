@@ -22,7 +22,7 @@ export interface IUser extends Document{
     imgUrl?: string;
     zkLogin: IZkLoginInfo | null,
     kycVerified: boolean;
-    farm?: mongoose.Types.ObjectId;
+    farm?: mongoose.Types.ObjectId[];
 }
 
 export type SafeUser = Omit<IUser, "password" | "mnemonic">;
@@ -43,7 +43,7 @@ const UserSchema = new Schema<IUser>({
       }
     },
     kycVerified: { type: Boolean, default: false }, // Future KYC verification
-    farm: { type: Schema.Types.ObjectId, ref: "Farm" }
+    farm: [{ type: Schema.Types.ObjectId, ref: "Farm" }]
 })
 
 UserSchema.set("toJSON", {
