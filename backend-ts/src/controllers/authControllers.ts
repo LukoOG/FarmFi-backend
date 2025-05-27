@@ -19,8 +19,6 @@ import { derivePath } from "ed25519-hd-key";
 import { User, IUser, SafeUser, IZkLoginInfo } from "../models/User";
 
 import "dotenv/config";
-import { Keypair } from "@mysten/sui/dist/cjs/cryptography";
-import { toBase64 } from "@mysten/sui/utils"
 
 export const register = async (req: Request, res: Response) => {
     try{
@@ -49,6 +47,7 @@ export const register = async (req: Request, res: Response) => {
             password: hashedPassword,
             role,
             mnemonic: encryptMnemonic(mnemonic, password), //store the encrypted mnemonic
+            imgUrl: "https://res.cloudinary.com/dfxieiol1/image/upload/v1748355861/default-pici_rxkswj.png", //default profile picture
             suiWalletAddress
         })
         await user.save()
@@ -99,6 +98,23 @@ export const login = async (req: Request, res: Response) => {
     }
 }
 
+export const updateProfile = async (req:Request, res:Response) => {
+    try{
+        // console.log(req)
+        if (req.file && req.file.path){
+            req.body.imgUrl = req.file.path
+        }
+        
+        const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        if (!updated) {res.status(400).json({error:"no user found"}); return}
+        res.status(200).json({msg:"user profile updated", user:updated})
+    } catch(error){
+        console.log(error)
+        res.status(500).json({ error: error})
+    }
+}
+
+
 export const refresh_token = async () => {
 
 }
@@ -124,7 +140,7 @@ export const getkeypair = async (req: Request, res:Response) => {
         const keypair = await getKeypair(user.mnemonic as string, password)
 
         //coding to bytes
-        const secretKey = keypair.getSecretKey(); // Uint8Array
+        const secretKey = keypair.getSecretKey(); // bech 32 encoded secet key
 
         res.status(200).json({keypair: secretKey})
         return

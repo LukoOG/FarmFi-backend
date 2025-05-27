@@ -78,6 +78,9 @@ export const getByFarmer = async (req:Request, res:Response) => {
 export const updateProduct = async (req:Request, res:Response) => {
     try{
         // console.log(req)
+        if (req.file && req.file.path){
+            req.body.imgUrl = req.file.path
+        }
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
         if (!product) {res.status(400).json({error:"no product found"}); return}
         res.status(200).json({msg:"product updated", product:product})

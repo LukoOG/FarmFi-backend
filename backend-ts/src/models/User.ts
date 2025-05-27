@@ -19,6 +19,7 @@ export interface IUser extends Document{
     location: string;
     suiWalletAddress: string;
     mnemonic?: string;
+    imgUrl?: string;
     zkLogin: IZkLoginInfo | null,
     kycVerified: boolean;
     farm?: mongoose.Types.ObjectId;
@@ -34,6 +35,7 @@ const UserSchema = new Schema<IUser>({
     location: { type: String, required: false},
     suiWalletAddress: { type: String }, // Store generated wallet address zkogin or traditional
     mnemonic: { type: String }, //Store encrypted mnemonic
+    imgUrl: { type: String },
     zkLogin: {type:
       {
         sub: String,
