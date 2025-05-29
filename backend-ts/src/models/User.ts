@@ -11,18 +11,25 @@ export interface IZkLoginInfo {
   salt: string;
 }
 
+type Location = {
+  home: string,
+  state: string, 
+}
+
 export interface IUser extends Document{
     name: string;
-    email: string | null;
+    email: string;
+    phone: string;
     password: string | null;
     role: string;
-    location: string;
+    NIN: string;
+    location: Location;
     suiWalletAddress: string;
     mnemonic?: string;
     imgUrl?: string;
     zkLogin: IZkLoginInfo | null,
     kycVerified: boolean;
-    farm?: mongoose.Types.ObjectId[];
+    farms: mongoose.Types.ObjectId[];
 }
 
 export type SafeUser = Omit<IUser, "password" | "mnemonic">;
@@ -30,9 +37,14 @@ export type SafeUser = Omit<IUser, "password" | "mnemonic">;
 const UserSchema = new Schema<IUser>({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true, unique: true},
     password: { type: String, required: true },
     role: { type: String, enum: ["buyer", "farmer", "logistics_admin"], required: true },
-    location: { type: String, required: false},
+    NIN: { type: String,  required: true },
+    location: { type: {
+      home: String,
+      state: String,
+    }, required: false},
     suiWalletAddress: { type: String }, // Store generated wallet address zkogin or traditional
     mnemonic: { type: String }, //Store encrypted mnemonic
     imgUrl: { type: String },
@@ -43,7 +55,7 @@ const UserSchema = new Schema<IUser>({
       }
     },
     kycVerified: { type: Boolean, default: false }, // Future KYC verification
-    farm: [{ type: Schema.Types.ObjectId, ref: "Farm" }]
+    farms: [{ type: Schema.Types.ObjectId, ref: "Farm", default: [] }]
 })
 
 UserSchema.set("toJSON", {

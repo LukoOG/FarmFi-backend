@@ -17,15 +17,31 @@ import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { derivePath } from "ed25519-hd-key";
 
 import { User, IUser, SafeUser, IZkLoginInfo } from "../models/User";
+import { startSession, Error } from "mongoose";
 
 import "dotenv/config";
+import { Farm } from "../models/Farm";
 
 export const register = async (req: Request, res: Response) => {
+    const session = await startSession();
     try{
-        const { name, email, password, role }= req.body
+        // const { name, email, password, role }= req.body
+        const { firstName, lastName, email, phoneNumber, password, role, nin, state, address } = req.body;
 
-        let user = await User.findOne({ email });
-        if (user)  res.status(400).json({ msg: "User already exists" });
+        if(!email || !password){
+            await session.endSession();
+            res.status(400).json({ msg: "Email and password are required" });
+            return;
+        }
+
+        let existingUser = await User.findOne({ email }).session(session);
+        if (existingUser){ 
+            await session.endSession();
+            res.status(400).json({ msg: "User already exists" });
+            return;
+        };
+
+        session.startTransaction()
 
         //hashing the password
         const salt: string = await bcrypt.genSalt(10);
@@ -41,26 +57,71 @@ export const register = async (req: Request, res: Response) => {
         const keypair = Ed25519Keypair.fromSecretKey(derivedKey);
         const suiWalletAddress = keypair.toSuiAddress();
 
-        user = new User({
-            name,
+        //other definitions
+        const fullname = `${firstName} ${lastName}`
+        const location = `${address}, ${state}`
+
+        const userData = new User({
+            name: fullname,
             email,
+            phone: phoneNumber,
             password: hashedPassword,
             role,
+            nin,
+            location,
             mnemonic: encryptMnemonic(mnemonic, password), //store the encrypted mnemonic
             imgUrl: "https://res.cloudinary.com/dfxieiol1/image/upload/v1748355861/default-pici_rxkswj.png", //default profile picture
-            suiWalletAddress
+            suiWalletAddress,
+            farms: []
         })
-        await user.save()
-        let userObj: SafeUser = user.toJSON()
+        
+        
+        const user = await User.create([userData], { session });
+        const newUser = user[0];
+        
+        //Saving the farm if the user is a farmer
+        if(role =="farmer"){
+            const { type, size, address,  } = req.body.farm
+            const farm = await new Farm({
+                type,
+                size,
+                crops: req.body.farm.crops || [],
+                location: address,
+                farmer: newUser._id,    
+            }).save({ session })
 
+            await User.findByIdAndUpdate(
+                newUser._id,
+                { $push: { farms: farm._id } },
+                { session }
+            );
+        }
+
+        await session.commitTransaction()
+        
         //generate jwt-token
+        let userObj: SafeUser = newUser.toJSON()
         const payload = { user: userObj };
         const token = jwt.sign(payload, process.env.TOKEN_SECRET!, { expiresIn: "7d" });
     
         res.json({ token, mnemonic });
         
-    } catch(err){
-         res.status(400).json({error:err})
+    } catch(error){
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+
+        if (error instanceof Error.ValidationError) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+
+        res.status(500).json({
+            error:"Registeration failed",
+            details: process.env.NODE_ENV === 'development' ? error : undefined
+        })
+    } finally {
+        await session.endSession()
     }
 }
 
