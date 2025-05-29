@@ -16,5 +16,5 @@ router.put(
 )
 router.post("/register", register)
 router.post("/keypair", getkeypair)
-router.post("/getMnemonic", getmnemonic)
+router.post("/get-mnemonic", getmnemonic)
 export default router
