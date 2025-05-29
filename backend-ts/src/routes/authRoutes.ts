@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getkeypair, login, register, updateProfile } from "../controllers/authControllers";
+import { getkeypair, getmnemonic, login, register, updateProfile } from "../controllers/authControllers";
 import upload from "../middlewares/upload";
 
 export const router = Router()
@@ -15,6 +15,6 @@ router.put(
     updateProfile
 )
 router.post("/register", register)
-router.post("/getMnemonic", getkeypair)
-
+router.post("/keypair", getkeypair)
+router.post("/getMnemonic", getmnemonic)
 export default router
