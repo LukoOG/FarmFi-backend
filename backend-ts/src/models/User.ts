@@ -67,7 +67,7 @@ UserSchema.set("toJSON", {
 })
 
 UserSchema.pre("save", function (next) {
-  if (this.role !== "farmer" && this.farm) {
+  if (this.role !== "farmer" && this.farms) {
     return next(new Error("Only farmers can have a farm"));
   }
   next();
