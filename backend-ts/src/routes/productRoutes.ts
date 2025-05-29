@@ -8,7 +8,8 @@ router.post("/create",
         req.body.folder = "product_images";
         next();
     },
-    upload.single("image"), 
+    // upload.single("image"), 
+    upload.array("image", 5), 
     createProduct
 )
 

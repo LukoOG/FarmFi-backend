@@ -21,7 +21,7 @@ export interface IProduct extends Document{
     category: typeof categories[number];
     weight: number;
     stock: number;
-    imgUrl?: string;
+    imgUrl?: string[];
     available: boolean;
     rating: number;
     reviews?: Review[];
@@ -37,7 +37,7 @@ const ProductSchema = new Schema<IProduct>({
     category: { type: String, enum: categories, required:true },
     weight: { type: Number, required:true },
     stock: { type: Number, required:true },
-    imgUrl: { type: String },
+    imgUrl: [{ type: String }],
     available: { type: Boolean, required:true, default:true},
     rating: { type: Number, default:0 },
     reviews: [
