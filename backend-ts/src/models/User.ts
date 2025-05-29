@@ -44,7 +44,7 @@ const UserSchema = new Schema<IUser>({
     location: { type: {
       home: String,
       state: String,
-    }, required: true},
+    }, required: true, _id: false},
     suiWalletAddress: { type: String }, // Store generated wallet address zkogin or traditional
     mnemonic: { type: String }, //Store encrypted mnemonic
     imgUrl: { type: String },
