@@ -59,7 +59,10 @@ export const register = async (req: Request, res: Response) => {
 
         //other definitions
         const fullname = `${firstName} ${lastName}`
-        const location = `${address}, ${state}`
+        const location = {
+            home: address,
+            state: state
+        }
 
         const userData = new User({
             name: fullname,
@@ -67,7 +70,7 @@ export const register = async (req: Request, res: Response) => {
             phone: phoneNumber,
             password: hashedPassword,
             role,
-            nin,
+            NIN: nin,
             location,
             mnemonic: encryptMnemonic(mnemonic, password), //store the encrypted mnemonic
             imgUrl: "https://res.cloudinary.com/dfxieiol1/image/upload/v1748355861/default-pici_rxkswj.png", //default profile picture
