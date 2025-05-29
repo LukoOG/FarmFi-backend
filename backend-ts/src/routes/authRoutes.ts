@@ -5,7 +5,7 @@ import upload from "../middlewares/upload";
 export const router = Router()
 
 router.post("/login", login)
-router.post(
+router.put(
     "/update/:id",
     (req, res, next) => {
         req.body.folder = "user_images";
@@ -15,6 +15,6 @@ router.post(
     updateProfile
 )
 router.post("/register", register)
-router.post("/keypair", getkeypair)
+router.post("/getMnemonic", getkeypair)
 
 export default router

@@ -120,6 +120,7 @@ export const refresh_token = async () => {
 }
 
 //development testing. Sending keypair bytes
+//bad practice. Keypair derivation will happen client-side
 export const getkeypair = async (req: Request, res:Response) => {
     try{
         const { email, password } = req.body
@@ -143,6 +144,32 @@ export const getkeypair = async (req: Request, res:Response) => {
         const secretKey = keypair.getSecretKey(); // bech 32 encoded secet key
 
         res.status(200).json({keypair: secretKey})
+        return
+    } catch(error){
+        res.status(500).json({error:"error getting user keypair"})
+        console.log(error)
+    }
+}
+
+export const getmnemonic = async (req: Request, res:Response) => {
+    try{
+        const { email, password } = req.body
+
+        //get the user
+        const user = await User.findOne({email}) as IUser
+        if (!user){
+            res.status(400).json({ msg: "User does not exist" })
+            return;
+        };
+        
+        const isMatch = bcrypt.compare(password, user.password as string)
+        if (!isMatch){
+            res.status(400).json({ msg:"Invalid credentials" })
+            return;
+        }
+
+        const mnemonic = user.mnemonic
+        res.status(200).json({mnemonic})
         return
     } catch(error){
         res.status(500).json({error:"error getting user keypair"})
