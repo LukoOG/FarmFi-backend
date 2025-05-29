@@ -11,7 +11,7 @@ export interface IZkLoginInfo {
   salt: string;
 }
 
-type Location = {
+interface Location  {
   home: string,
   state: string, 
 }
@@ -44,7 +44,7 @@ const UserSchema = new Schema<IUser>({
     location: { type: {
       home: String,
       state: String,
-    }, required: false},
+    }, required: true},
     suiWalletAddress: { type: String }, // Store generated wallet address zkogin or traditional
     mnemonic: { type: String }, //Store encrypted mnemonic
     imgUrl: { type: String },
@@ -55,7 +55,7 @@ const UserSchema = new Schema<IUser>({
       }
     },
     kycVerified: { type: Boolean, default: false }, // Future KYC verification
-    farms: [{ type: Schema.Types.ObjectId, ref: "Farm", default: [] }]
+    farms: { type: [Schema.Types.ObjectId], ref: "Farm", default: null }
 })
 
 UserSchema.set("toJSON", {
@@ -67,7 +67,7 @@ UserSchema.set("toJSON", {
 })
 
 UserSchema.pre("save", function (next) {
-  if (this.role !== "farmer" && this.farms) {
+  if (this.role !== "farmer" && this.farms && Array.isArray(this.farms) && this.farms.length > 0) {
     return next(new Error("Only farmers can have a farm"));
   }
   next();

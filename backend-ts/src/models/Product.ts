@@ -37,7 +37,7 @@ const ProductSchema = new Schema<IProduct>({
     category: { type: String, enum: categories, required:true },
     weight: { type: Number, required:true },
     stock: { type: Number, required:true },
-    imgUrl: [{ type: String }],
+    imgUrl: { type: [String] },
     available: { type: Boolean, required:true, default:true},
     rating: { type: Number, default:0 },
     reviews: [
@@ -46,7 +46,7 @@ const ProductSchema = new Schema<IProduct>({
         review: String,
     }}
     ],
-    relatedCommodities: [{type: String}]
+    relatedCommodities: {type: [String]}
 })
 
 export const Product = mongoose.model<IProduct>("Product", ProductSchema)

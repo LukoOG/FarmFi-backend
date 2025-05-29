@@ -22,6 +22,9 @@ import { startSession, Error } from "mongoose";
 import "dotenv/config";
 import { Farm } from "../models/Farm";
 
+
+const development = process.env.NODE_ENV === 'development'
+
 export const register = async (req: Request, res: Response) => {
     const session = await startSession();
     try{
@@ -41,8 +44,7 @@ export const register = async (req: Request, res: Response) => {
             return;
         };
 
-        session.startTransaction()
-
+        
         //hashing the password
         const salt: string = await bcrypt.genSalt(10);
         const hashedPassword: string = await bcrypt.hash(password, salt);
@@ -75,15 +77,16 @@ export const register = async (req: Request, res: Response) => {
             mnemonic: encryptMnemonic(mnemonic, password), //store the encrypted mnemonic
             imgUrl: "https://res.cloudinary.com/dfxieiol1/image/upload/v1748355861/default-pici_rxkswj.png", //default profile picture
             suiWalletAddress,
-            farms: []
-        })
+            farms: role === "farmer" ? [] : null
+        });
         
         
-        const user = await User.create([userData], { session });
-        const newUser = user[0];
+        
+        session.startTransaction();
+        const newUser = await userData.save({ session });
         
         //Saving the farm if the user is a farmer
-        if(role =="farmer"){
+        if(role === "farmer"){
             const { type, size, address,  } = req.body.farm
             const farm = await new Farm({
                 type,
@@ -92,7 +95,7 @@ export const register = async (req: Request, res: Response) => {
                 location: address,
                 farmer: newUser._id,    
             }).save({ session })
-
+            
             await User.findByIdAndUpdate(
                 newUser._id,
                 { $push: { farms: farm._id } },
@@ -110,6 +113,10 @@ export const register = async (req: Request, res: Response) => {
         res.json({ token, mnemonic });
         
     } catch(error){
+        if(development){
+            console.log("this is the: ",error);
+        }
+
         if (session.inTransaction()) {
             await session.abortTransaction();
         }
@@ -117,12 +124,14 @@ export const register = async (req: Request, res: Response) => {
         if (error instanceof Error.ValidationError) {
             res.status(400).json({ error: error.message });
             return;
-        }
-
+        } else{
         res.status(500).json({
             error:"Registeration failed",
-            details: process.env.NODE_ENV === 'development' ? error : undefined
+            details: development ? error : undefined
         })
+
+        }
+
     } finally {
         await session.endSession()
     }
