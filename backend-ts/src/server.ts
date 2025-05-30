@@ -14,6 +14,7 @@ const app = express();
 const allowedOrigins = [
     "http://localhost:3000", // Dev Frontend
     "https://farm-fi.vercel.app", // ✅ Production Frontend
+	"https://farm-fi-one.vercel.app", //Kayode's Frontend
   ];
   
   app.use(
