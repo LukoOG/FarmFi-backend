@@ -5,7 +5,9 @@ import cloudinary from "../utils/cloudinary";
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-        const folder = req.body.folder || "product_images"; 
+        // const folder = req.body.folder || "product_images"; 
+        const folder = (req as any).folder || "product_images"; 
+        console.log(folder)
         return {
             folder,
             allowed_formats: ["jpg", "jpeg", "png"],

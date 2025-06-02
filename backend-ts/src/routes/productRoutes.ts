@@ -5,7 +5,8 @@ const router = Router()
 
 router.post("/create", 
     (req, res, next) => {
-        req.body.folder = "product_images";
+        // req.body.folder = "product_images";
+        (req as any).folder = "product_images";
         next();
     },
     // upload.single("image"), 
@@ -15,7 +16,7 @@ router.post("/create",
 
 router.post("/create/multiple", 
     (req, res, next) => {
-        req.body.folder = "product_images";
+        (req as any).folder = "product_images";
         next();
 }, 
 upload.array("images", 10), 
