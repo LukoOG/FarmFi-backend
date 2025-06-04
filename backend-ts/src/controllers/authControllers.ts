@@ -146,8 +146,11 @@ export const login = async (req: Request, res: Response) => {
         if (!user)  res.status(400).json({ msg: "User does not exist" });
 
         //check password
-        const isMatch = bcrypt.compare(password, user.password as string)
-        if (!isMatch)  res.status(400).json({ msg:"Invalid credentials" })
+        const isMatch = await bcrypt.compare(password, user.password as string)
+        if (!isMatch){
+            res.status(400).json({ msg:"Invalid credentials" })
+            return
+        }
 
         let userObj = user.toJSON() as SafeUser
         
@@ -235,7 +238,7 @@ export const getmnemonic = async (req: Request, res:Response) => {
             return;
         };
         
-        const isMatch = bcrypt.compare(password, user.password as string)
+        const isMatch = await bcrypt.compare(password, user.password as string)
         if (!isMatch){
             res.status(400).json({ msg:"Invalid credentials" })
             return;
