@@ -26,7 +26,11 @@ createMultipleProducts
 router.get("/all", getAll)
 router.get("/:id", getByID)
 router.get("/farmer/:id", getByFarmer)
-router.put("/update/:id", updateProduct)
+
+router.put("/update/:id", 
+    upload.array("image", 5),
+    updateProduct
+)
 
 router.delete("/delete/:id", deleteProduct)
 
