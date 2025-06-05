@@ -91,7 +91,8 @@ export const updateProduct = async (req:Request, res:Response) => {
     try{
         // console.log(req)
         let images = []
-        if (req.files){
+        if (req.files && req.files.length > 0){
+            console.log("files")
             for (let i = 0; i<= req.files.length - 1; i++){
                 images.push(req.files[i].path)
             }
