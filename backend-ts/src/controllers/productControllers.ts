@@ -93,7 +93,7 @@ export const updateProduct = async (req:Request, res:Response) => {
         let images = []
         if (req.files){
             for (let i = 0; i<= req.files.length - 1; i++){
-                images.push(req.files[i])
+                images.push(req.files[i].path)
             }
             req.body.imgUrl = images
         }
