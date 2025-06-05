@@ -97,6 +97,9 @@ export const updateProduct = async (req:Request, res:Response) => {
                 images.push(req.files[i].path)
             }
             req.body.imgUrl = images
+        } else if (!req.files || req.files.length <= 0){
+            req.body.imgUrl = JSON.parse(req.body.imgUrl)  //parsing the stringified field from frontend
+            console.log("parsed")
         }
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true })
         if (!product) {res.status(400).json({error:"no product found"}); return}
