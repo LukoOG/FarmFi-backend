@@ -8,7 +8,7 @@ router.post("/login", login)
 router.put(
     "/update/:id",
     (req, res, next) => {
-        req.body.folder = "user_images";
+        (req as any).folder = "user_images";
         next();
     },
     upload.single("image"),

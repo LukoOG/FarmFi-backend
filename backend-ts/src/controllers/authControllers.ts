@@ -176,7 +176,6 @@ export const login = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req:Request, res:Response) => {
     try{
-        // console.log(req)
         if (req.file && req.file.path){
             req.body.imgUrl = req.file.path
         }
