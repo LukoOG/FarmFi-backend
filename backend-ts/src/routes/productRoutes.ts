@@ -28,6 +28,10 @@ router.get("/:id", getByID)
 router.get("/farmer/:id", getByFarmer)
 
 router.put("/update/:id", 
+    (req, res, next) => {
+        (req as any).folder = "product_images";
+        next();
+    }, 
     upload.array("image", 5),
     updateProduct
 )
