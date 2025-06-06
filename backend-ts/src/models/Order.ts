@@ -7,7 +7,8 @@ const status = [
 ] as const;
 
 export interface FarmerPaymentDetail{
-    farmer: string; //will save wallet address instead of id
+    farmer: string; 
+    suiWalletAddress: string;
     paymentAmount: number;
     quantityMap: Record<string, number>;
 

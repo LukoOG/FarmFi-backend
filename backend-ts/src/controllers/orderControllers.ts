@@ -35,12 +35,13 @@ export const createOrder = async (req: Request, res: Response) => {
     const farmerMap: Record<string, FarmerPaymentDetail> = {}
     for (const product of products){
         productIds.add(product._id)
-        const farmerId = product.farmer
+        const farmerId = product.farmer._id
 
         if(!farmerMap[farmerId]){
 
             farmerMap[farmerId] = {
                 farmer: farmerId,
+                suiWalletAddress: product.farmer.suiWalletAddress,
                 paymentAmount: 0,
                 quantityMap: {}
             }
@@ -62,7 +63,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
     await orderData.save()
 
-    const tx = await createOrderTx(payment) //transaction object to be signed
+    const tx = await createOrderTx(orderData._id, payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
 
     if (tx){
         res.status(200).json({
