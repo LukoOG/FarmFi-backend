@@ -23,7 +23,7 @@ public fun error_PriceMismatch():u64 {EPriceMismatch}
 public fun error_InvalidSelfTrade():u64 {EInvalidSelfTrade}
 
 //structs
-public struct FarmerPaymentDetail has drop {
+public struct FarmerPaymentDetail has drop, store {
     farmer: address,
     paymentAmount: u64,
 }

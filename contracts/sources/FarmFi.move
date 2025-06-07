@@ -21,6 +21,7 @@ public struct OrderCreated has copy, drop{order_address: address}
 public struct Order<phantom T> has store, key{
     id: UID,
     buyer: address,
+    paymentDetails: vector<config::FarmerPaymentDetail>,
     offchain_id: String,
     status: Status,
     escrow: Option<Coin<T>>,
@@ -54,6 +55,7 @@ public fun create_order<T:key+store>(
     let order = Order{
         id: object::new(ctx),
         buyer: buyer,
+        paymentDetails,
         offchain_id,
         status: Status::Pending,
         escrow: option::some(buyer_payment),
@@ -74,8 +76,15 @@ public fun create_order<T:key+store>(
 //     // let v_u = order.escrow.value();
 //     // let escrow_funds = order.escrow.split<SUI>(v_u, ctx);
 //     let escrow_funds = option::extract(&mut order.escrow);
-//     let recipient: address = order.farmer;
+//     //loop through farmers, and transfer
+//     let mut i = 0
+//     loop{
+//         order.paymentDetails.borrow(i).get_farmer()
+//         if(i == order.paymentDetails.length()){
+//             break
+//         }
 //     transfer::public_transfer(escrow_funds, recipient);
+//     }
 
 //     order.status = Status::Completed;
 // }
