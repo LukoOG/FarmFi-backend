@@ -5,6 +5,8 @@ import { Request, Response } from "express";
 import { createOrderTx } from "../contracts/sui";
 import { IProduct, Product } from "../models/Product";
 
+const development = process.env.NODE_ENV === 'development'
+
 export const getOrder = async (req: Request, res: Response) => {
     //adjust according to frontend needs
     try{
@@ -22,57 +24,66 @@ export const getOrder = async (req: Request, res: Response) => {
 
 //ability to process multpled products from different farmers
 export const createOrder = async (req: Request, res: Response) => {
-    const { buyer, products, price, payment } = req.body //expected information
-    //cases to abort operation
-    const user = await User.findOne({ email:buyer });
-    if(!user){
-        res.status(400).json({error:"User not found"})
-        return
-    }
-    //construct Order object
-    // 1. All product ids
-    const productIds = new Set<string>()
-    const farmerMap: Record<string, FarmerPaymentDetail> = {}
-    for (const product of products){
-        productIds.add(product._id)
-        const farmerId = product.farmer._id
-
-        if(!farmerMap[farmerId]){
-
-            farmerMap[farmerId] = {
-                farmer: farmerId,
-                suiWalletAddress: product.farmer.suiWalletAddress,
-                paymentAmount: 0,
-                quantityMap: {}
-            }
-            
+    try{
+            const { buyer, products, price, payment } = req.body //expected information
+        //cases to abort operation
+        const user = await User.findOne({ email:buyer });
+        if(!user){
+            res.status(400).json({error:"User not found"})
+            return
         }
-        //increment product quantity
-        farmerMap[farmerId].quantityMap[product._id] = (farmerMap[farmerId].quantityMap[product._id] || 0) + 1;
+        //construct Order object
+        // 1. All product ids
+        const productIds = new Set<string>()
+        const farmerMap: Record<string, FarmerPaymentDetail> = {}
+        for (const product of products){
+            productIds.add(product._id)
+            const farmerId = product.farmer._id
 
-        farmerMap[farmerId].paymentAmount += product.price
+            if(!farmerMap[farmerId]){
 
-    }
+                farmerMap[farmerId] = {
+                    farmer: farmerId,
+                    suiWalletAddress: product.farmer.suiWalletAddress,
+                    paymentAmount: 0,
+                    quantityMap: {}
+                }
+                
+            }
+            //increment product quantity
+            farmerMap[farmerId].quantityMap[product._id] = (farmerMap[farmerId].quantityMap[product._id] || 0) + 1;
 
-    const orderData = new Order({
-        farmerPayments: Object.values(farmerMap),
-        buyer: user._id,
-        products: Array.from(productIds),
-        totalPrice: price,
-    })
+            farmerMap[farmerId].paymentAmount += product.price
 
-    await orderData.save()
+        }
 
-    const tx = await createOrderTx(orderData._id, payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
-
-    if (tx){
-        res.status(200).json({
-            serializedTransaction: tx, 
-            order_id: orderData._id
+        const orderData = new Order({
+            farmerPayments: Object.values(farmerMap),
+            buyer: user._id,
+            products: Array.from(productIds),
+            totalPrice: price,
         })
+
+        await orderData.save()
+
+        // const tx = await createOrderTx(orderData._id, payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
+        res.json(200).json({msg:"order created", order:orderData})
         return
+        // if (tx){
+        //     res.status(200).json({
+        //         serializedTransaction: tx, 
+        //         order_id: orderData._id
+        //     })
+        //     return
+        // }
+        // res.status(500).json({error:"internal server error"})
+    }catch(error){
+        res.status(500).json({error:error})
+        if(development){
+            console.log(error)
+        }
     }
-    res.status(500).json({error:"internal server error"})
+
 }
 
 export const getAll = async (req: Request, res: Response) => {
