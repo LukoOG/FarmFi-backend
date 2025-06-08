@@ -66,7 +66,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
         await orderData.save()
 
-        const tx = await createOrderTx(String(orderData._id), payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
+        const tx = await createOrderTx(user.suiWalletAddress, String(orderData._id), payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
 
         if (tx){
             res.status(200).json({
