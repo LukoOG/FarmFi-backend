@@ -42,6 +42,7 @@ export const createOrderTx = async (sender:string, offchain_id: string, payment:
     const paymentDetailsVector = tx.makeMoveVec({ type: paymentVectorType, elements:paymentDetailsArguments})
 
     console.log(offchain_id, typeof offchain_id)
+    console.log(paymentDetailsVector)
 
 
     tx.moveCall({
