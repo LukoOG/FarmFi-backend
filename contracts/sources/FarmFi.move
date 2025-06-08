@@ -27,6 +27,8 @@ public struct Order<phantom T> has store, key{
     escrow: Option<Coin<T>>,
 }
 
+//Due to issues serializing a vector of our custom struct; I will refactor the code till I' m able to test/resolve it
+
 //will remove after learning to properly serialize vector of structs from TS sdk
 public struct FarmerPaymentDetail has drop, store {
     farmer: address,
