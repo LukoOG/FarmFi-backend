@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 
 import { createOrderTx } from "../contracts/sui";
 import { IProduct, Product } from "../models/Product";
+import { toBase64 } from "@mysten/sui/utils"
 
 const development = process.env.NODE_ENV === 'development'
 
@@ -70,7 +71,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
         if (tx){
             res.status(200).json({
-                serializedTransaction: tx, 
+                serializedTransaction: toBase64(tx), 
                 order_id: orderData._id
             })
             return
