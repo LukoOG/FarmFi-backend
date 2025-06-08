@@ -78,6 +78,7 @@ export const createOrder = async (req: Request, res: Response) => {
         res.status(500).json({error:"internal server error"})
     }catch(error){
         res.status(500).json({error:error})
+        console.log(error)
         if(development){
             console.log(error)
         }
