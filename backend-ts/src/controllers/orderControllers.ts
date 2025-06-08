@@ -66,17 +66,16 @@ export const createOrder = async (req: Request, res: Response) => {
 
         await orderData.save()
 
-        // const tx = await createOrderTx(orderData._id, payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
-        res.json(200).json({msg:"order created", order:orderData})
-        return
-        // if (tx){
-        //     res.status(200).json({
-        //         serializedTransaction: tx, 
-        //         order_id: orderData._id
-        //     })
-        //     return
-        // }
-        // res.status(500).json({error:"internal server error"})
+        const tx = await createOrderTx(orderData._id, payment, orderData.farmerPayments, orderData.totalPrice) //transaction object to be signed
+
+        if (tx){
+            res.status(200).json({
+                serializedTransaction: tx, 
+                order_id: orderData._id
+            })
+            return
+        }
+        res.status(500).json({error:"internal server error"})
     }catch(error){
         res.status(500).json({error:error})
         if(development){
