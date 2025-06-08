@@ -58,7 +58,9 @@ OrderSchema.pre("save", function (next){
     }
 
     if(this.totalPrice != totalPaymentDetailPrice){
-        return next(new Error("totalprice field and sum of payment amount in Farmer details must match"))
+        console.log(`total price: ${this.totalPrice}, total price from payment details: ${totalPaymentDetailPrice}`)
+        // return next(new Error("totalprice field and sum of payment amount in Farmer details must match"))
+        return next(new Error(`totalprice field and sum of payment amount in Farmer details must match total price: ${this.totalPrice}, total price from payment details: ${totalPaymentDetailPrice}`))
     }
     next()
 })

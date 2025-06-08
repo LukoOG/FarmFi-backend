@@ -33,7 +33,7 @@ const constructPaymentBytes = (paymentDetails:FarmerPaymentDetail[]) => {
 // const coinType = ""
 const CreateSMC = `${process.env.MOVE_PACKAGE_ID}::${process.env.MOVE_MODULE_NAME}::create_order`
 const paymentVectorType = `${process.env.MOVE_PACKAGE_ID}::config::FarmerPaymentDetail`
-export const createOrderTx = async (offchain_id: unknown, payment:CoinStruct, paymentDetails:FarmerPaymentDetail[], totalPrice: number) => {
+export const createOrderTx = async (offchain_id: string, payment:CoinStruct, paymentDetails:FarmerPaymentDetail[], totalPrice: number) => {
 
     const tx = new Transaction();
     const paymentDetailsBytes = constructPaymentBytes(paymentDetails)
