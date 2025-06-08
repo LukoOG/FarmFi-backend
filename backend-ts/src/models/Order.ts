@@ -27,13 +27,19 @@ interface IOrder extends Document{
     escrowTxHash?: string;
 }
 
+const FarmerPaymentSchema = new Schema<FarmerPaymentDetail>({
+  farmer: { type: String, required: true },
+  suiWalletAddress: { type: String, required: true },
+  paymentAmount: { type: Number, required: true },
+  quantityMap: {
+    type: Map,
+    of: Number,
+    required: true,
+  },
+}, { _id: false });
+
 const OrderSchema = new Schema<IOrder>({
-    farmerPayments: { type: [
-        {
-            farmer: String,
-            paymentAmount: Number,
-        }
-    ]},
+    farmerPayments: { type:[FarmerPaymentSchema], _id:false },
     buyer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     products: [{
         type: mongoose.Schema.Types.ObjectId,
