@@ -44,7 +44,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
                 farmerMap[farmerId] = {
                     farmer: farmerId,
-                    suiWalletAddress: product.farmer.suiWalletAddress,
+                    suiWalletAddress: user.suiWalletAddress,
                     paymentAmount: 0,
                     quantityMap: {}
                 }
