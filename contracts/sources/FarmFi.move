@@ -21,31 +21,55 @@ public struct OrderCreated has copy, drop{order_address: address}
 public struct Order<phantom T> has store, key{
     id: UID,
     buyer: address,
-    paymentDetails: vector<config::FarmerPaymentDetail>,
+    paymentDetails: vector<FarmerPaymentDetail>,
     offchain_id: String,
     status: Status,
     escrow: Option<Coin<T>>,
 }
 
+//will remove after learning to properly serialize vector of structs from TS sdk
+public struct FarmerPaymentDetail has drop, store {
+    farmer: address,
+    paymentAmount: u64,
+}
+
 ///creates the order on the blockchain, buyer sends create request
 public fun create_order<T:key+store>(
     offchain_id: String,
-    paymentDetails: vector<config::FarmerPaymentDetail>,
+    // paymentDetails: vector<config::FarmerPaymentDetail>,
+    farmers: vector<address>,
+    payments: vector<u64>,
     buyer_payment: Coin<T>,
     totalPrice: u64,
     ctx: &mut TxContext
 ):address{
     //check cases
+    let len = vector::length(&farmers);
+    assert!(len == vector::length(&payments), config::error_PriceMismatch());
+
+    let mut paymentDetails = vector[];
     let mut i = 0;
     let mut total = 0;
-    loop {
-        assert!(paymentDetails.borrow(i).get_farmer() != ctx.sender(), config::error_InvalidSelfTrade());
-        total = paymentDetails.borrow(i).get_payment() + total;
+    while(i < len){
+        let farmer = *vector::borrow(&farmers, i);
+        let payment = *vector::borrow(&payments, i);
+
+        // assert!(paymentDetails.borrow(i).get_farmer() != ctx.sender(), config::error_InvalidSelfTrade());
+        // total = paymentDetails.borrow(i).get_payment() + total;
+        assert!(farmer != ctx.sender(), config::error_InvalidSelfTrade());
+        total = payment + total;
+        
+        let detail = FarmerPaymentDetail {
+            farmer,
+            paymentAmount: payment,
+        };
+        vector::push_back(&mut paymentDetails, detail);
+
         i = i + 1;
 
-        if(i == paymentDetails.length()){
-            break
-        }
+        // if(i == paymentDetails.length()){
+        //     break
+        // }
     };
 
     assert!(total == totalPrice, config::error_PriceMismatch());
