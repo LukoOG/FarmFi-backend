@@ -30,6 +30,12 @@ const constructPaymentBytes = (paymentDetails:FarmerPaymentDetail[]) => {
     return paymentDetailsBytes
 }
 
+const constructFarmerandPaymentVectors = (paymentDetails:FarmerPaymentDetail[]) => {
+    let farmers = paymentDetails.map(detail=>detail.suiWalletAddress)
+    let payments = paymentDetails.map(detail=>BigInt(detail.paymentAmount))
+    return { farmers, payments}
+}
+
 // const coinType = ""
 const CreateSMC = `${process.env.MOVE_PACKAGE_ID}::${process.env.MOVE_MODULE_NAME}::create_order`
 const paymentVectorType = `${process.env.MOVE_PACKAGE_ID}::config::FarmerPaymentDetail`
@@ -39,17 +45,20 @@ export const createOrderTx = async (sender:string, offchain_id: string, payment:
     const tx = new Transaction();
     const paymentDetailsBytes = constructPaymentBytes(paymentDetails)
     const paymentDetailsArguments = paymentDetailsBytes.map((bytes)=>tx.pure(bytes))
-    const paymentDetailsVector = tx.makeMoveVec({ type: paymentVectorType, elements:paymentDetailsArguments})
+    // const paymentDetailsVector = tx.makeMoveVec({ type: paymentVectorType, elements:paymentDetailsArguments})
 
     console.log(offchain_id, typeof offchain_id)
-    console.log(paymentDetailsVector)
+
+    const {farmers, payments} = constructFarmerandPaymentVectors(paymentDetails)
 
 
     tx.moveCall({
         target: CreateSMC,
         arguments: [
             tx.pure.string(offchain_id as string),
-            paymentDetailsVector,
+            // paymentDetailsVector,
+            tx.pure.vector('address', farmers),
+            tx.pure.vector('u64', payments),
             tx.object(payment.coinObjectId),
             tx.pure.u64(totalPrice)
         ],
