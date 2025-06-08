@@ -55,6 +55,7 @@ OrderSchema.pre("save", function (next){
     let totalPaymentDetailPrice = 0;
     for (let i=0; i <=this.farmerPayments.length-1;i++){
         totalPaymentDetailPrice += this.farmerPayments[i].paymentAmount
+        console.log(`${this.totalPrice}, payment details: ${this.farmerPayments[i].paymentAmount}`)
     }
 
     if(this.totalPrice != totalPaymentDetailPrice){
